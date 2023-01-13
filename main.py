@@ -1,7 +1,7 @@
-
 import discord
 from discord.ext import commands
 
+from src.user.init import players
 from creds import bot_token
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
