@@ -1,11 +1,14 @@
 import discord
 from discord.ext import commands
 
-from src.user.init import players
 from creds import bot_token
+
+from src.quiz.quiz import Quiz
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 bot.remove_command("help")
+
+quiz = Quiz([], [], "start test", "end test")
 
 
 @bot.event
@@ -16,8 +19,19 @@ async def on_ready():
 @bot.event
 async def on_message(ctx: discord.Message):
     await bot.process_commands(ctx)
+    """
     if ctx.author != bot.user:
-        print(ctx.author, ":", ctx.content)
+        print(ctx.author, ":", ctx.content, "in", ctx.channel)
+        if type(ctx.channel) is discord.DMChannel:
+            print("dm")
+        else:
+            print("no dm")
+    """
+
+
+@bot.command()
+async def start(ctx: discord.Message):
+    await quiz.start_quiz(ctx)
 
 
 @bot.command()
