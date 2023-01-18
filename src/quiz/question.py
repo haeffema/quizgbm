@@ -1,7 +1,7 @@
 class Question:
-    def __init__(self, question, answer, hints, max_guesses, player_guesses):
+    def __init__(self, image, question, answer, hints, max_guesses):
+        self.image = image
         self.question = question
         self.answer = answer
         self.hints = hints
         self.max_guesses = max_guesses
-        self.player_guesses = player_guesses
