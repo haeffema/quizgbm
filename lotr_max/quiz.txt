@@ -1,0 +1,3 @@
+Dies ist die Start-Nachricht
+Dies ist die End-Nachricht
+send1.png;Wie heißt diese Figur?;Gandalf der Weiße;Sein Name besteht aus drei Wörtern;Das erste Wort ist sein bekanntester Name, das zweite ein Artikel;Früher hieß er Gandalf der Graue;3

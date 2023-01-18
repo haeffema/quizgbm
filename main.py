@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands, tasks
 
 from creds import bot_token
-from src.quiz.question import Question
 from src.quiz.quiz import Quiz
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
@@ -45,7 +44,7 @@ async def start(ctx: discord.Message):
         await quiz.start_quiz()
 
 
-@tasks.loop(seconds=10)
+@tasks.loop(seconds=1)
 async def question():
     if quiz.started:
         await quiz.send_question()
@@ -65,16 +64,7 @@ def init():
     global quiz_channel
     quiz_channel = bot.get_channel(quiz_channel_id)
     global quiz
-    quiz = Quiz(test_channel, [],
-                [Question('images/test.png', "Wie heißt dieser Charackter", "Gandalf der Weiße",
-                          ["Sein Name besteht aus 3 Wörtern",
-                           "Das erste Wort sollte man schonmal gehört haben, das zweite ist ein männlicher Artikel",
-                           "Früher hieß er Gandalf der Graue"], 3),
-                 Question('images/test.png', "Wie heißt dieser Charackter2", "Gandalf der Weiße",
-                          ["Sein Name besteht aus 3 Wörtern",
-                           "Das erste Wort sollte man schonmal gehört haben, das zweite ist ein männlicher Artikel",
-                           "Früher hieß er Gandalf der Graue"], 3)],
-                "test start", "test end")
+    quiz = Quiz(test_channel, [], 'lotr_max')
 
 
 bot.run(bot_token)
