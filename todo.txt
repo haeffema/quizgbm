@@ -1,7 +1,0 @@
-auto send für bilder (mit quiz.count)
-antworten entgegennehmen
-hints senden
-eine erinnerung senden, dass man noch antworten sollte
-punktestand senden
-punkte berechnen
-

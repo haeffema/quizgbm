@@ -1,10 +1,10 @@
 import discord
 
-from src.quiz.question import Question
+from src.question import Question
 
 
 class Quiz:
-    def __init__(self, channel, players: list, folder: str):
+    def __init__(self, channel: discord.TextChannel, players: list, folder: str):
         self.players = players
         self.channel = channel
         self.folder = folder
@@ -20,16 +20,17 @@ class Quiz:
             self.start_message = setup.readline()
             self.end_message = setup.readline()
             for question in setup.readlines():
-                self.generate_question(question, self.folder)
+                self.generate_question(question)
 
-    def generate_question(self, question_str: str, folder: str):
+    def generate_question(self, question_str: str):
         question_information = question_str.split(";")
-        self.questions.append(Question(question_information, folder))
+        self.questions.append(Question(question_information))
 
     async def send_question(self):
         if self.count < len(self.questions):
             question: Question = self.questions[self.count]
-            await self.send_image(discord.File(question.image))
+            file = discord.File(self.folder + "/send" + str(self.count) + ".png")
+            await self.send_image(file)
             await self.send_text(question.question)
             self.count += 1
             return
@@ -49,4 +50,4 @@ class Quiz:
         await self.channel.send(file=image)
 
     async def send_text(self, message: str):
-        await self.channel.send(message)
+        await self.channel.send("@everyone\n" + message)
