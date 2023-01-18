@@ -1,0 +1,10 @@
+Quiz aus .txt oder so erstellen
+images nur mit file name senden
+punktestand senden
+antworten entgegennehmen
+hints senden
+punkte berechnen
+eine erinnerung senden, dass man noch antworten sollte
+start nachricht erstellen
+end nachricht erstellen
+fragen erstellen
