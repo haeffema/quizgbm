@@ -85,7 +85,10 @@ class Quiz:
                     return
                 if ctx.content == self.active_question.answer:
                     await ctx.add_reaction('\N{white heavy check mark}')
-                    player.points += 4 - player.guesses // self.active_question.max_guesses
+                    if player.guesses // self.active_question.max_guesses > 3:
+                        player.points += 1
+                    else:
+                        player.points += 4 - player.guesses // self.active_question.max_guesses
                     player.correct_today = True
                     await self.all_correct_today()
                 else:
