@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import discord
 
 from src.player import Player
@@ -13,7 +15,7 @@ class Quiz:
         self.start_message = None
         self.end_message = None
         self.active_question = None
-        self.active = False
+        self.is_active = False
         self.count = 0
         self.generate_quiz()
 
@@ -38,39 +40,42 @@ class Quiz:
     async def send_question(self):
         if self.active_question is not None:
             await self.reveal_answer()
+        self.reset_guesses()
         if self.count < len(self.questions):
-            for player in self.players:
-                player.guesses = 0
-                player.correct_today = False
             self.active_question = self.questions[self.count]
-            try:
-                file = discord.File(self.folder + "/send" + str(self.count) + ".png")
-                await self.send_image(file)
-            except():
-                pass
-            await self.send_text("@everyone " + self.active_question.question)
+            await self.send_image_of_question()
+            await self.send_text(self.active_question.question)
             self.count += 1
-            return
-        await self.end_quiz()
+        else:
+            await self.end_quiz()
 
     async def start_quiz(self):
-        if self.active:
+        if self.is_active:
             return
         await self.send_text(self.start_message)
-        self.active = True
+        self.is_active = True
 
     async def end_quiz(self):
         await self.send_text(self.end_message)
-        self.active = False
+        await self.send_points()
+        await self.send_text("Damit gewinnt " + self.players[0].name + "! Herzlichen Glückwunsch!")
+        self.is_active = False
 
-    async def send_image(self, image: discord.File):
-        await self.channel.send(file=image)
+    async def send_image_of_question(self):
+        file = Path(self.folder + '/send' + str(self.count) + '.png')
+        if file.exists():
+            await self.channel.send(file=discord.File(self.folder + "/send" + str(self.count) + ".png"))
 
     async def send_text(self, message: str):
         await self.channel.send(message)
 
     async def send_player_text(self, message: str, player):
         await player.send(message)
+
+    def reset_guesses(self):
+        for player in self.players:
+            player.guesses = 0
+            player.correct_today = False
 
     async def user_answer(self, ctx: discord.Message):
         for player in self.players:
@@ -82,25 +87,26 @@ class Quiz:
                     await ctx.add_reaction('\N{white heavy check mark}')
                     player.points += 4 - player.guesses // self.active_question.max_guesses
                     player.correct_today = True
-                    self.every_one_finished()
+                    await self.all_correct_today()
                 else:
                     await ctx.add_reaction('\N{negative squared cross mark}')
                     for x in range(3):
                         if player.guesses == self.active_question.max_guesses * (x + 1):
                             await self.send_player_text(self.active_question.hints[x], ctx.author)
 
-    def every_one_finished(self):
+    async def all_correct_today(self):
         for player in self.players:
             if not player.correct_today:
                 return
-        self.reveal_answer()
+        await self.reveal_answer()
 
     async def reveal_answer(self):
+        await self.send_text("Die Lösung war: " + self.active_question.answer)
+        await self.send_points()
         self.active_question = None
-        await self.print_points()
 
-    async def print_points(self):
-        self.players.sort(key=lambda x: x.points)
+    async def send_points(self):
+        self.players.sort(key=lambda x: x.points, reverse=True)
         rank = 1
         for index, player in enumerate(self.players):
             player.rank = rank

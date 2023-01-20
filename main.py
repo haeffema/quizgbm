@@ -22,20 +22,21 @@ async def on_ready():
 async def on_message(ctx: discord.Message):
     await bot.process_commands(ctx)
     if type(ctx.channel) is discord.DMChannel:
-        print(ctx.author, ctx.content)
+        if ctx.author != bot.user:
+            await quiz_master.send(ctx.author.name + ": " + ctx.content)
         await quiz.user_answer(ctx)
 
 
 @bot.command()
 async def start(ctx: discord.Message):
-    if ctx.author == quiz_master and not quiz.active:
+    if ctx.author == quiz_master and not quiz.is_active:
         question.start()
         await quiz.start_quiz()
 
 
-@tasks.loop(hours=24)
+@tasks.loop(seconds=30)
 async def question():
-    if quiz.active:
+    if quiz.is_active:
         await quiz.send_question()
 
 
