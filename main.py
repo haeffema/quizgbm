@@ -34,7 +34,7 @@ async def start(ctx: discord.Message):
         await quiz.start_quiz()
 
 
-@tasks.loop(seconds=30)
+@tasks.loop(hours=24)
 async def question():
     if quiz.is_active:
         await quiz.send_question()
