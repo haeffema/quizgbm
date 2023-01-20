@@ -21,33 +21,22 @@ async def on_ready():
 @bot.event
 async def on_message(ctx: discord.Message):
     await bot.process_commands(ctx)
-    """
-    if ctx.author != bot.user:
-        print(ctx.author, ":", ctx.content, "in", ctx.channel)
-        if type(ctx.channel) is discord.DMChannel:
-            print("dm")
-        else:
-            print("no dm")
-    """
+    if type(ctx.channel) is discord.DMChannel:
+        print(ctx.author, ctx.content)
+        await quiz.user_answer(ctx)
 
 
 @bot.command()
 async def start(ctx: discord.Message):
-    if ctx.author == quiz_master and not quiz.started:
+    if ctx.author == quiz_master and not quiz.active:
         question.start()
         await quiz.start_quiz()
 
 
-@tasks.loop(seconds=1)
+@tasks.loop(seconds=10)
 async def question():
-    if quiz.started:
+    if quiz.active:
         await quiz.send_question()
-
-
-@bot.command()
-async def get(ctx: discord.Message):
-    await ctx.channel.send(
-        "https://discord.com/api/oauth2/authorize?client_id=802219294330585148&permissions=8&scope=bot")
 
 
 def init():
@@ -56,7 +45,7 @@ def init():
     global quiz
     quiz_master = bot.get_user(quiz_master_id)
     quiz_channel = bot.get_channel(quiz_channel_id)
-    quiz = Quiz(quiz_channel, [], folder)
+    quiz = Quiz(quiz_channel, folder)
 
 
 bot.run(bot_token)

@@ -1,17 +1,19 @@
 import discord
 
+from src.player import Player
 from src.question import Question
 
 
 class Quiz:
-    def __init__(self, channel: discord.TextChannel, players: list, folder: str):
-        self.players = players
+    def __init__(self, channel: discord.TextChannel, folder: str):
         self.channel = channel
         self.folder = folder
+        self.players = []
         self.questions = []
         self.start_message = None
         self.end_message = None
-        self.started = False
+        self.active_question = None
+        self.active = False
         self.count = 0
         self.generate_quiz()
 
@@ -21,33 +23,86 @@ class Quiz:
             self.end_message = setup.readline()
             for question in setup.readlines():
                 self.generate_question(question)
+        with open(self.folder + '/player.txt', encoding="utf-8") as setup:
+            for player in setup.readlines():
+                self.generate_player(player)
 
     def generate_question(self, question_str: str):
         question_information = question_str.split(";")
         self.questions.append(Question(question_information))
 
+    def generate_player(self, player_str: str):
+        player_information = player_str.split(";")
+        self.players.append(Player(player_information))
+
     async def send_question(self):
+        if self.active_question is not None:
+            await self.reveal_answer()
         if self.count < len(self.questions):
-            question: Question = self.questions[self.count]
+            for player in self.players:
+                player.guesses = 0
+                player.correct_today = False
+            self.active_question = self.questions[self.count]
             file = discord.File(self.folder + "/send" + str(self.count) + ".png")
             await self.send_image(file)
-            await self.send_text(question.question)
+            await self.send_text("@everyone " + self.active_question.question)
             self.count += 1
             return
         await self.end_quiz()
 
     async def start_quiz(self):
-        if self.started:
+        if self.active:
             return
         await self.send_text(self.start_message)
-        self.started = True
+        self.active = True
 
     async def end_quiz(self):
         await self.send_text(self.end_message)
-        self.started = False
+        self.active = False
 
     async def send_image(self, image: discord.File):
         await self.channel.send(file=image)
 
     async def send_text(self, message: str):
-        await self.channel.send("@everyone\n" + message)
+        await self.channel.send(message)
+
+    async def send_player_text(self, message: str, player):
+        await player.send(message)
+
+    async def user_answer(self, ctx: discord.Message):
+        for player in self.players:
+            if ctx.author.id == player.id:
+                player.guesses += 1
+                if self.active_question is None:
+                    return
+                if ctx.content == self.active_question.answer:
+                    await ctx.add_reaction('\N{white heavy check mark}')
+                    player.points += 4 - player.guesses // self.active_question.max_guesses
+                    player.correct_today = True
+                    self.every_one_finished()
+                else:
+                    await ctx.add_reaction('\N{negative squared cross mark}')
+                    for x in range(3):
+                        if player.guesses == self.active_question.max_guesses * (x + 1):
+                            await self.send_player_text(self.active_question.hints[x], ctx.author)
+
+    def every_one_finished(self):
+        for player in self.players:
+            if not player.correct_today:
+                return
+        self.reveal_answer()
+
+    async def reveal_answer(self):
+        self.active_question = None
+        await self.print_points()
+
+    async def print_points(self):
+        self.players.sort(key=lambda x: x.points)
+        rank = 1
+        for index, player in enumerate(self.players):
+            player.rank = rank
+            for x in range(index):
+                if self.players[x].points == player.points:
+                    player.rank = self.players[x].rank
+            await self.send_text(str(player.rank) + ". " + player.name + ": " + str(player.points))
+            rank += 1
