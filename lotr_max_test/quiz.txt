@@ -2,4 +2,4 @@ Willkommen zum Test Quiz um den neuen Bot zu testen. Was hat sich aber geändert
 Vielen Dank für eure Teilnahme am Test-Quiz. Ich hoffe jetzt ist alles klar und ihr seid bereit für die richtige Challenge.
 Wie heißt diese Figur?;Gandalf der Weiße;Sein Name besteht aus drei Wörtern;Das erste Wort ist sein bekanntester Name, das zweite ein Artikel;Früher hieß er Gandalf der Graue;3
 Wer sagte: "Ich bin Feuer, Ich bin der Tod."?;Smaug;Dieses Zitat stammt nicht aus der Herr der Ringe;Nach dieser Figur wurde einer der drei Hobbit Filme benannt;Die Figur ist ein Drache;2
-Wer hat das private Kill-Duell von Gimli und Legolas in Helms Klamm gewonnen?Legolas;Der andere lol;Spaß vertippt;Ey komm jetzt aber;1
+Wer hat das private Kill-Duell von Gimli und Legolas in Helms Klamm gewonnen?;Legolas;Der andere lol;Spaß vertippt;Ey komm jetzt aber;1
