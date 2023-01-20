@@ -43,8 +43,11 @@ class Quiz:
                 player.guesses = 0
                 player.correct_today = False
             self.active_question = self.questions[self.count]
-            file = discord.File(self.folder + "/send" + str(self.count) + ".png")
-            await self.send_image(file)
+            try:
+                file = discord.File(self.folder + "/send" + str(self.count) + ".png")
+                await self.send_image(file)
+            except():
+                pass
             await self.send_text("@everyone " + self.active_question.question)
             self.count += 1
             return
