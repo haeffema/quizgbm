@@ -56,9 +56,8 @@ class Quiz:
         self.is_active = True
 
     async def end_quiz(self):
-        await self.send_text(self.end_message)
-        await self.send_points()
         await self.send_text("Damit gewinnt " + self.players[0].name + "! Herzlichen Glückwunsch!")
+        await self.send_text(self.end_message)
         self.is_active = False
 
     async def send_image_of_question(self):
