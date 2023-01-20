@@ -1,3 +1,5 @@
-Dies ist die Start-Nachricht
-Dies ist die End-Nachricht
+Willkommen zum Test Quiz um den neuen Bot zu testen. Was hat sich aber geändert, alle 24h nach dem die Challenge gestartet wurde hat man 24h Zeit die Frage zu beantworten. Dies passiert per DM mit dem Bot. Schreibt man in den Challenge Channel gibt es Punktabzug ;). Punkt bekommt man abhängig von der Anzahl an Tipps die man gebraucht hat, diese kommen automatisch nach x Versuchen. Der bot markiert eine Antwort mit :negative_squared_cross_mark: für falsch und :white_check_mark: für richtig. Der Punktestand wird automatisiert in den Channel geschickt.
+Vielen Dank für eure Teilnahme am Test-Quiz. Ich hoffe jetzt ist alles klar und ihr seid bereit für die richtige Challenge.
 Wie heißt diese Figur?;Gandalf der Weiße;Sein Name besteht aus drei Wörtern;Das erste Wort ist sein bekanntester Name, das zweite ein Artikel;Früher hieß er Gandalf der Graue;3
+Wer sagte: "Ich bin Feuer, Ich bin der Tod."?;Smaug;Dieses Zitat stammt nicht aus der Herr der Ringe;Nach dieser Figur wurde einer der drei Hobbit Filme benannt;Die Figur ist ein Drache;2
+Wer hat das private Kill-Duell von Gimli und Legolas in Helms Klamm gewonnen?Legolas;Der andere lol;Spaß vertippt;Ey komm jetzt aber;1
