@@ -85,7 +85,9 @@ class Quiz:
                     return
                 if ctx.content == self.active_question.answer:
                     await ctx.add_reaction('\N{white heavy check mark}')
-                    if player.guesses // self.active_question.max_guesses > 3:
+                    if self.active_question.max_guesses == 1:
+                        player.points += 5 - player.guesses
+                    elif player.guesses // self.active_question.max_guesses > 3:
                         player.points += 1
                     else:
                         player.points += 4 - player.guesses // self.active_question.max_guesses
