@@ -52,9 +52,7 @@ class Quiz:
     async def start_quiz(self):
         if self.is_active:
             return
-        texts = self.start_message.split("|")
-        for text in texts:
-            await self.send_text(text)
+        await self.send_text(self.start_message)
         self.is_active = True
 
     async def end_quiz(self):
@@ -68,7 +66,9 @@ class Quiz:
             await self.channel.send(file=discord.File(self.folder + "/send" + str(self.count) + ".png"))
 
     async def send_text(self, message: str):
-        await self.channel.send(message)
+        texts = message.split("|")
+        for text in texts:
+            await self.channel.send(text)
 
     async def send_player_text(self, message: str, player):
         await player.send(message)
