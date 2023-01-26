@@ -52,7 +52,9 @@ class Quiz:
     async def start_quiz(self):
         if self.is_active:
             return
-        await self.send_text(self.start_message)
+        texts = self.start_message.split("\n")
+        for text in texts:
+            await self.send_text(text)
         self.is_active = True
 
     async def end_quiz(self):
