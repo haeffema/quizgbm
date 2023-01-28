@@ -81,6 +81,8 @@ class Quiz:
     async def user_answer(self, ctx: discord.Message):
         for player in self.players:
             if ctx.author.id == player.id:
+                if player.correct_today:
+                    return
                 player.guesses += 1
                 if self.active_question is None:
                     return
