@@ -25,17 +25,23 @@ class Quiz:
             self.end_message = setup.readline()
             for question in setup.readlines():
                 self.generate_question(question)
-        with open(self.folder + '/player.txt', encoding="utf-8") as setup:
-            for player in setup.readlines():
-                self.generate_player(player)
 
     def generate_question(self, question_str: str):
         question_information = question_str.split(";")
         self.questions.append(Question(question_information))
 
-    def generate_player(self, player_str: str):
-        player_information = player_str.split(";")
-        self.players.append(Player(player_information))
+    def register_player(self, id, name):
+        for player in self.players:
+            if player.id == id:
+                player.name = name
+                return
+        self.players.append(Player(id, name))
+
+    def quit_player(self, id):
+        for player in self.players:
+            if player.id == id:
+                self.players.remove(player)
+                return player.name
 
     async def send_question(self):
         if self.active_question is not None:
@@ -46,6 +52,8 @@ class Quiz:
             await self.send_image_of_question()
             await self.send_text(self.active_question.question)
             self.count += 1
+            await self.send_text(str(self.count) + "/" + str(len(self.questions)) + ": " + str(
+                self.active_question.max_guesses) + " guesses")
         else:
             await self.end_quiz()
 
@@ -56,7 +64,9 @@ class Quiz:
         self.is_active = True
 
     async def end_quiz(self):
-        await self.send_text("Damit gewinnt " + self.players[0].name + "! Herzlichen Glückwunsch!")
+        for player in self.players:
+            if player.rank == 1:
+                await self.send_text("Herzlichen Glückwunsch " + self.players.name)
         await self.send_text(self.end_message)
         self.is_active = False
 
@@ -95,6 +105,7 @@ class Quiz:
                     else:
                         player.points += 4 - player.guesses // self.active_question.max_guesses
                     player.correct_today = True
+                    await self.send_player_text(f"Damit hast du nun {player.points} Punkte.", ctx.author)
                     await self.all_correct_today()
                 else:
                     await ctx.add_reaction('\N{negative squared cross mark}')
@@ -110,8 +121,13 @@ class Quiz:
 
     async def reveal_answer(self):
         await self.send_text("Die Lösung war: " + self.active_question.answer)
+        await self.send_text("Hints:")
+        for hint in self.active_question.hints:
+            await self.send_text(hint)
         await self.send_points()
         self.active_question = None
+        if self.count == len(self.questions):
+            self.end_quiz()
 
     async def send_points(self):
         self.players.sort(key=lambda x: x.points, reverse=True)
