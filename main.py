@@ -50,7 +50,7 @@ async def register(interaction: discord.Interaction, username: str):
 @bot.tree.command(name="quit")
 @app_commands.describe()
 async def quit(interaction: discord.Interaction):
-    await interaction.response.send_message(f"removed {quiz.quit_player()}", ephemeral=True)
+    await interaction.response.send_message(f"removed {quiz.quit_player(interaction.user.id)}", ephemeral=True)
 
 
 @bot.tree.command(name="points")
