@@ -43,6 +43,12 @@ class Quiz:
                 self.players.remove(player)
                 return player.name
 
+    def get_points(self, id):
+        for player in self.players:
+            if id == player.id:
+                return player.points
+        return "noch keine Punkte, da du nicht registriert bist. Benutze /register username und erhalte deine ersten"
+
     async def send_question(self):
         if self.active_question is not None:
             await self.reveal_answer()

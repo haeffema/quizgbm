@@ -53,6 +53,12 @@ async def quit(interaction: discord.Interaction):
     await interaction.response.send_message(f"removed {quiz.quit_player()}", ephemeral=True)
 
 
+@bot.tree.command(name="points")
+@app_commands.describe()
+async def points(interaction: discord.Interaction):
+    await interaction.response.send_message(f"Da hast gerade {quiz.get_points(interaction.user.id)} Punkte.", ephemeral=True)
+
+
 @tasks.loop(hours=24)
 async def question():
     if quiz.is_active:
