@@ -66,7 +66,7 @@ class Quiz:
     async def start_quiz(self):
         if self.is_active:
             return
-        await self.send_text(self.start_message)
+        # await self.send_text(self.start_message)
         self.is_active = True
 
     async def end_quiz(self):
@@ -99,7 +99,6 @@ class Quiz:
             if ctx.author.id == player.id:
                 if player.correct_today:
                     return
-                player.guesses += 1
                 if self.active_question is None:
                     return
                 if ctx.content == self.active_question.answer:
@@ -114,6 +113,7 @@ class Quiz:
                     await self.send_player_text(f"Damit hast du nun {player.points} Punkte.", ctx.author)
                     await self.all_correct_today()
                 else:
+                    player.guesses += 1
                     await ctx.add_reaction('\N{negative squared cross mark}')
                     for x in range(3):
                         if player.guesses == self.active_question.max_guesses * (x + 1):
@@ -145,3 +145,9 @@ class Quiz:
                     player.rank = self.players[x].rank
             await self.send_text(str(player.rank) + ". " + player.name + ": " + str(player.points))
             rank += 1
+
+    def set_points(self, id, points):
+        for player in self.players:
+            if player.id == id:
+                player.points = points
+                return player.name

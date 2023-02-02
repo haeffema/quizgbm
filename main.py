@@ -36,8 +36,8 @@ async def on_message(ctx: discord.Message):
 @bot.command()
 async def start(ctx: discord.Message):
     if ctx.author == quiz_master and not quiz.is_active:
-        question.start()
         await quiz.start_quiz()
+        question.start()
 
 
 @bot.tree.command(name="register")
@@ -56,7 +56,17 @@ async def quit(interaction: discord.Interaction):
 @bot.tree.command(name="points")
 @app_commands.describe()
 async def points(interaction: discord.Interaction):
-    await interaction.response.send_message(f"Da hast gerade {quiz.get_points(interaction.user.id)} Punkte.", ephemeral=True)
+    await interaction.response.send_message(f"Da hast gerade {quiz.get_points(interaction.user.id)} Punkte.",
+                                            ephemeral=True)
+
+
+@bot.tree.command(name="set_points")
+@app_commands.describe(player="id")
+@app_commands.describe(new_points="points")
+async def set_points(interaction: discord.Interaction, player: str, new_points: int):
+    if interaction.user.id == quiz_master_id:
+        name = quiz.set_points(int(player), new_points)
+        await interaction.response.send_message(f"Set {name} points to {new_points}", ephemeral=True)
 
 
 @tasks.loop(hours=24)
