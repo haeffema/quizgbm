@@ -151,3 +151,6 @@ class Quiz:
             if player.id == id:
                 player.points = points
                 return player.name
+        player = Player(id, "auto generated bot noob")
+        player.points = points
+        self.players.append(player)
