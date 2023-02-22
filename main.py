@@ -26,15 +26,13 @@ async def on_ready():
 
 @bot.event
 async def on_message(ctx: discord.Message):
-    if ctx.author == bot.user:
-        pass
-    if type(ctx.channel) is discord.DMChannel:
-        if ctx.author != bot.user and ctx.author != quiz_master:
+    if ctx.author != bot.user and ctx.author != quiz_master:
+        if type(ctx.channel) is discord.DMChannel:
             await quiz_master.send(ctx.author.name + ": " + ctx.content)
-        await quiz.user_answer(ctx)
-    if ctx.channel == quiz_channel:
-        quiz.points_minus_one(ctx.author)
-        await ctx.delete()
+            await quiz.user_answer(ctx)
+        if ctx.channel == quiz_channel:
+            quiz.points_minus_one(ctx.author)
+            await ctx.delete()
 
 
 @bot.tree.command(name="help")
@@ -102,7 +100,7 @@ async def table(interaction: discord.Interaction):
     await interaction.response.send_message("check your dms", ephemeral=True)
     for player in quiz.players:
         await interaction.user.send(
-            f"{player.rank}. {player.username}: {player.points}. ({player.guesses} - {player.correct_today})")
+            f"{player.rank}. {player.username}: {player.points} ({player.guesses} - {player.correct_today})")
 
 
 @bot.tree.command(name="set_points")
@@ -126,7 +124,7 @@ async def send_message(interaction: discord.Interaction, message: str):
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
-@tasks.loop(minutes=1)
+@tasks.loop(hours=24)
 async def question():
     if quiz.is_active:
         await quiz.send_question(quiz_master)

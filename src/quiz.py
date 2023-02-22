@@ -121,7 +121,7 @@ class Quiz:
                 if player.correct_today or self.active_question is None:
                     return
                 if user_answer.content == self.active_question.answer:
-                    self.calculate_points(player)
+                    player.points += self.calculate_points(player)
                     player.correct_today = True
                     await user_answer.add_reaction('\N{white heavy check mark}')
                     await user_answer.reply(f"Damit hast du nun {player.points} Punkte.")
