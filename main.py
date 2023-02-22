@@ -104,7 +104,7 @@ async def table(interaction: discord.Interaction):
 
 
 @bot.tree.command(name="set_points")
-@app_commands.describe(player="the player which points will be changed")
+@app_commands.describe(user="the player which points will be changed")
 @app_commands.describe(new_points="the new points for the player")
 async def set_points(interaction: discord.Interaction, user: discord.User, new_points: int):
     if interaction.user == quiz_master:
