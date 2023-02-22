@@ -16,7 +16,7 @@ global quiz
 @bot.event
 async def on_ready():
     init()
-    print("logged in as {0.user}".format(bot))
+    print(f"logged in as {bot.user}")
     try:
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} command(s)")
@@ -36,8 +36,8 @@ async def on_message(ctx: discord.Message):
 @bot.command()
 async def start(ctx: discord.Message):
     if ctx.author == quiz_master and not quiz.is_active:
-        await quiz.start_quiz()
         question.start()
+        await quiz.start_quiz()
 
 
 @bot.tree.command(name="register")

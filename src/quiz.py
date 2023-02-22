@@ -66,7 +66,7 @@ class Quiz:
     async def start_quiz(self):
         if self.is_active:
             return
-        # await self.send_text(self.start_message)
+        await self.send_text(self.start_message)
         self.is_active = True
 
     async def end_quiz(self):
