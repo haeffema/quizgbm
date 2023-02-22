@@ -37,7 +37,7 @@ class Quiz:
 
     async def start_at(self, number):
         if not self.is_active:
-            self.count = number + 1
+            self.count = number - 1
             self.is_active = True
 
     def join(self, user: discord.User):
