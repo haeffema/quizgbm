@@ -48,7 +48,7 @@ async def start(interaction: discord.Interaction):
 
 
 @bot.tree.command(name="start_at")
-@app_commands.describe(number="Number of the Question to start the Quiz from.")
+@app_commands.describe(number="the number of the question the quiz will be started from")
 async def start_at(interaction: discord.Interaction, number: int):
     if interaction.user == quiz_master and not quiz.is_active:
         await quiz.start_at(number)
@@ -72,6 +72,7 @@ async def update_username(interaction: discord.Interaction, username: str):
 
 
 @bot.tree.command(name="remove")
+@app_commands.describe(player="the player that will be removed")
 async def remove(interaction: discord.Interaction, player: discord.User):
     if interaction.user == quiz_master:
         quiz.remove(player)
@@ -87,12 +88,22 @@ async def table(interaction: discord.Interaction):
 
 
 @bot.tree.command(name="set_points")
-@app_commands.describe(player="id")
-@app_commands.describe(new_points="points")
+@app_commands.describe(player="the player which points will be changed")
+@app_commands.describe(new_points="the new points for the player")
 async def set_points(interaction: discord.Interaction, user: discord.User, new_points: int):
     if interaction.user == quiz_master:
         quiz.set_points(user, new_points)
         await interaction.response.send_message(f"set points of {user.name} to {new_points}", ephemeral=True)
+    else:
+        await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
+
+
+@bot.tree.command(name="send_message")
+@app_commands.describe(message="message that will be sent")
+async def send_message(interaction: discord.Interaction, message: str):
+    if interaction.user == quiz_master:
+        await quiz_channel.send(message)
+        await interaction.response.send_message("message sent", ephemeral=True)
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
