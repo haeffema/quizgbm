@@ -49,6 +49,7 @@ async def help(interaction: discord.Interaction):
     await interaction.user.send("/update_username: you can change your username so its not the generated username")
     await interaction.user.send(
         "/table: you get the current table. (The guesses a player has today and if the player has correctly answered today)")
+    await interaction.user.send("/hint: you go directly to the next hint")
 
 
 @bot.tree.command(name="start")
@@ -93,6 +94,12 @@ async def remove(interaction: discord.Interaction, player: discord.User):
         quiz.remove(player)
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
+
+
+@bot.tree.command(name="hint")
+async def hint(interaction: discord.Interaction):
+    await interaction.response.send_message("check your dms :(", ephemeral=True)
+    quiz.hint(interaction.user)
 
 
 @bot.tree.command(name="table")

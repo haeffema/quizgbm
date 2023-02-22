@@ -67,6 +67,15 @@ class Quiz:
         player.points = points
         self.players.append(player)
 
+    def hint(self, user: discord.User):
+        for player in self.players:
+            if player.user == user:
+                player.guesses += self.active_question.max_guesses - player.guesses % self.active_question.max_guesses
+                for x in range(3):
+                    if player.guesses == self.active_question.max_guesses * (x + 1):
+                        await user.send(self.active_question.hints[x])
+                        return
+
     async def send_text(self, message: str):
         for text in message.split("|"):
             await self.channel.send(text)
