@@ -36,7 +36,7 @@ class Quiz:
             self.is_active = True
 
     async def start_at(self, number):
-        if self.is_active:
+        if not self.is_active:
             self.count = number
             self.is_active = True
 
