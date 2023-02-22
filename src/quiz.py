@@ -86,38 +86,35 @@ class Quiz:
         for text in texts:
             await self.channel.send(text)
 
-    async def send_player_text(self, message: str, player):
-        await player.send(message)
-
     def reset_guesses(self):
         for player in self.players:
             player.guesses = 0
             player.correct_today = False
 
-    async def user_answer(self, ctx: discord.Message):
+    async def user_answer(self, user_answer: discord.Message):
         for player in self.players:
-            if ctx.author.id == player.id:
-                if player.correct_today:
+            if user_answer.author.id == player.id:
+                if player.correct_today or self.active_question is None:
                     return
-                if self.active_question is None:
-                    return
-                if ctx.content == self.active_question.answer:
-                    await ctx.add_reaction('\N{white heavy check mark}')
-                    if self.active_question.max_guesses == 1:
-                        player.points += 5 - player.guesses
-                    elif player.guesses // self.active_question.max_guesses > 3:
-                        player.points += 1
-                    else:
-                        player.points += 4 - player.guesses // self.active_question.max_guesses
+                if user_answer.content == self.active_question.answer:
+                    self.calc_points(player)
                     player.correct_today = True
-                    await self.send_player_text(f"Damit hast du nun {player.points} Punkte.", ctx.author)
+                    await user_answer.add_reaction('\N{white heavy check mark}')
+                    await user_answer.reply(f"Damit hast du nun {player.points} Punkte.")
                     await self.all_correct_today()
                 else:
                     player.guesses += 1
-                    await ctx.add_reaction('\N{negative squared cross mark}')
+                    await user_answer.add_reaction('\N{negative squared cross mark}')
                     for x in range(3):
                         if player.guesses == self.active_question.max_guesses * (x + 1):
-                            await self.send_player_text(self.active_question.hints[x], ctx.author)
+                            await user_answer.reply(self.active_question.hints[x])
+                return
+
+    def calc_points(self, player):
+        points = 4 - (player.guesses // self.active_question.max_guesses)
+        if points < 1:
+            return 1
+        return points
 
     async def all_correct_today(self):
         for player in self.players:
@@ -133,7 +130,7 @@ class Quiz:
         await self.send_points()
         self.active_question = None
         if self.count == len(self.questions):
-            self.end_quiz()
+            await self.end_quiz()
 
     async def send_points(self):
         self.players.sort(key=lambda x: x.points, reverse=True)
