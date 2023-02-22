@@ -31,6 +31,8 @@ async def on_message(ctx: discord.Message):
         if ctx.author != bot.user:
             await quiz_master.send(ctx.author.name + ": " + ctx.content)
         await quiz.user_answer(ctx)
+    if ctx.channel == quiz_channel:
+        quiz.points_minus_one(ctx.author.id)
 
 
 @bot.command()

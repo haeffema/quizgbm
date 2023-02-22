@@ -151,3 +151,8 @@ class Quiz:
         player = Player(id, "auto generated bot noob")
         player.points = points
         self.players.append(player)
+
+    def points_minus_one(self, id):
+        for player in self.players:
+            if player.id == id:
+                player.points -= 1
