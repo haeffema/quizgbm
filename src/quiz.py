@@ -82,13 +82,13 @@ class Quiz:
         if self.count < len(self.questions):
             self.active_question = self.questions[self.count]
             self.count += 1
+            await quiz_master.send("Heutigen Hints:")
+            for hint in self.active_question.hints:
+                await quiz_master.send(hint)
             await self.send_image()
             await self.send_text(self.active_question.question)
             await self.send_text(str(self.count) + "/" + str(len(self.questions)) + ": " + str(
                 self.active_question.max_guesses) + " guesses")
-            await quiz_master.send("Heutigen Hints:")
-            for hint in self.active_question.hints:
-                await quiz_master.send(hint)
 
     async def reveal_answer(self):
         self.reset_guesses()
