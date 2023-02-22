@@ -39,6 +39,7 @@ async def on_message(ctx: discord.Message):
 
 @bot.tree.command(name="help")
 async def help(interaction: discord.Interaction):
+    await interaction.response.send_message("check your dms", ephemeral=True)
     if interaction.user == quiz_master:
         await interaction.user.send("/start: start the current quiz")
         await interaction.user.send("/start_at: start the current quiz at the given number")
@@ -55,9 +56,9 @@ async def help(interaction: discord.Interaction):
 @bot.tree.command(name="start")
 async def start(interaction: discord.Interaction):
     if interaction.user == quiz_master and not quiz.is_active:
+        await interaction.response.send_message(f"started quiz", ephemeral=True)
         question.start()
         await quiz.start()
-        await interaction.response.send_message(f"started quiz", ephemeral=True)
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
@@ -66,38 +67,39 @@ async def start(interaction: discord.Interaction):
 @app_commands.describe(number="the number of the question the quiz will be started from")
 async def start_at(interaction: discord.Interaction, number: int):
     if interaction.user == quiz_master and not quiz.is_active:
+        await interaction.response.send_message(f"started quiz at {number}", ephemeral=True)
         await quiz.start_at(number)
         question.start()
-        await interaction.response.send_message(f"started quiz at {number}", ephemeral=True)
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
 @bot.tree.command(name="join")
 async def join(interaction: discord.Interaction):
-    quiz.join(interaction.user)
     await interaction.response.send_message(f"welcome to the quiz :)", ephemeral=True)
+    quiz.join(interaction.user)
 
 
 @bot.tree.command(name="update_username")
 @app_commands.describe(username="the new username")
 async def update_username(interaction: discord.Interaction, username: str):
-    quiz.update_username(interaction.user, username)
     await interaction.response.send_message(f"updated username to {username}", ephemeral=True)
+    quiz.update_username(interaction.user, username)
 
 
 @bot.tree.command(name="remove")
 @app_commands.describe(player="the player that will be removed")
 async def remove(interaction: discord.Interaction, player: discord.User):
     if interaction.user == quiz_master:
-        quiz.remove(player)
         await interaction.response.send_message(f"removed {player.name}", ephemeral=True)
+        quiz.remove(player)
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
 @bot.tree.command(name="table")
 async def table(interaction: discord.Interaction):
+    await interaction.response.send_message("check your dms", ephemeral=True)
     for player in quiz.players:
         await interaction.user.send(
             f"{player.rank}. {player.username}: {player.points}. ({player.guesses} - {player.correct_today})")
@@ -108,8 +110,8 @@ async def table(interaction: discord.Interaction):
 @app_commands.describe(new_points="the new points for the player")
 async def set_points(interaction: discord.Interaction, user: discord.User, new_points: int):
     if interaction.user == quiz_master:
-        quiz.set_points(user, new_points)
         await interaction.response.send_message(f"set points of {user.name} to {new_points}", ephemeral=True)
+        quiz.set_points(user, new_points)
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
@@ -118,8 +120,8 @@ async def set_points(interaction: discord.Interaction, user: discord.User, new_p
 @app_commands.describe(message="message that will be sent")
 async def send_message(interaction: discord.Interaction, message: str):
     if interaction.user == quiz_master:
-        await quiz_channel.send(message)
         await interaction.response.send_message("message sent", ephemeral=True)
+        await quiz_channel.send(message)
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 

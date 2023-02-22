@@ -86,7 +86,7 @@ class Quiz:
             await self.send_text(self.active_question.question)
             await self.send_text(str(self.count) + "/" + str(len(self.questions)) + ": " + str(
                 self.active_question.max_guesses) + " guesses")
-            await quiz_master.send("Hints:")
+            await quiz_master.send("Heutigen Hints:")
             for hint in self.active_question.hints:
                 await quiz_master.send(hint)
 
