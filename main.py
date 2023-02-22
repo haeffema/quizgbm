@@ -37,6 +37,21 @@ async def on_message(ctx: discord.Message):
         await ctx.delete()
 
 
+@bot.tree.command(name="help")
+async def help(interaction: discord.Interaction):
+    if interaction.user == quiz_master:
+        await interaction.user.send("/start: start the current quiz")
+        await interaction.user.send("/start_at: start the current quiz at the given number")
+        await interaction.user.send("/remove: remove a user from the quiz")
+        await interaction.user.send(
+            "/set_points: update the points for a user. if the user doesnt exist it creates the user with the given points")
+        await interaction.user.send("/send_message: sends the message in the quiz channel")
+    await interaction.user.send("/join: you join the quiz")
+    await interaction.user.send("/update_username: you can change your username so its not the generated username")
+    await interaction.user.send(
+        "/table: you get the current table. (The guesses a player has today and if the player has correctly answered today)")
+
+
 @bot.tree.command(name="start")
 async def start(interaction: discord.Interaction):
     if interaction.user == quiz_master and not quiz.is_active:
@@ -84,7 +99,8 @@ async def remove(interaction: discord.Interaction, player: discord.User):
 @bot.tree.command(name="table")
 async def table(interaction: discord.Interaction):
     for player in quiz.players:
-        await interaction.user.send(f"{player.rank}. {player.username}: {player.points}")
+        await interaction.user.send(
+            f"{player.rank}. {player.username}: {player.points}. ({player.guesses} - {player.correct_today})")
 
 
 @bot.tree.command(name="set_points")
