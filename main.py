@@ -35,11 +35,25 @@ async def on_message(ctx: discord.Message):
         quiz.points_minus_one(ctx.author.id)
 
 
-@bot.command()
-async def start(ctx: discord.Message):
-    if ctx.author == quiz_master and not quiz.is_active:
+@bot.tree.command(name="start")
+async def start(interaction: discord.Interaction):
+    if interaction.user == quiz_master and not quiz.is_active:
         question.start()
         await quiz.start_quiz()
+        await interaction.response.send_message(f"started quiz", ephemeral=True)
+    else:
+        await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
+
+
+@bot.tree.command(name="start_at")
+@app_commands.describe(number="Number of the Question to start the Quiz from.")
+async def start_at(interaction: discord.Interaction, number: int):
+    if interaction.user == quiz_master and not quiz.is_active:
+        await quiz.start_quiz_at(number)
+        question.start()
+        await interaction.response.send_message(f"started quiz at {number}", ephemeral=True)
+    else:
+        await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
 @bot.tree.command(name="register")

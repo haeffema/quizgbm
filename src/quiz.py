@@ -69,6 +69,12 @@ class Quiz:
         await self.send_text(self.start_message)
         self.is_active = True
 
+    async def start_quiz_at(self, number):
+        if self.is_active:
+            return
+        self.count = number
+        self.is_active = True
+
     async def end_quiz(self):
         for player in self.players:
             if player.rank == 1:
