@@ -126,7 +126,7 @@ async def send_message(interaction: discord.Interaction, message: str):
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
-@tasks.loop(hours=24)
+@tasks.loop(minutes=1)
 async def question():
     if quiz.is_active:
         await quiz.send_question(quiz_master)

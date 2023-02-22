@@ -85,6 +85,7 @@ class Quiz:
             await quiz_master.send("Heutigen Hints:")
             for hint in self.active_question.hints:
                 await quiz_master.send(hint)
+            await quiz_master.send("Heutige Lösung: " + self.active_question.answer)
             await self.send_image()
             await self.send_text(self.active_question.question)
             await self.send_text(str(self.count) + "/" + str(len(self.questions)) + ": " + str(
