@@ -30,80 +30,94 @@ class Quiz:
         question_information = question_str.split(";")
         self.questions.append(Question(question_information))
 
-    def register_player(self, id, name):
+    async def start(self):
+        if not self.is_active:
+            await self.send_text(self.start_message)
+            self.is_active = True
+
+    async def start_at(self, number):
+        if self.is_active:
+            self.count = number
+            self.is_active = True
+
+    def join(self, user: discord.User):
         for player in self.players:
-            if player.id == id:
-                player.name = name
+            if player.user == user:
                 return
-        self.players.append(Player(id, name))
+        self.players.append(Player(user, user.name))
 
-    def quit_player(self, id):
+    def update_username(self, user: discord.User, username: str):
         for player in self.players:
-            if player.id == id:
+            if player.user == user:
+                player.username = username
+                return
+
+    def remove(self, user: discord.User):
+        for player in self.players:
+            if player.user == user:
                 self.players.remove(player)
-                return player.name
+                return
 
-    def get_points(self, id):
+    def set_points(self, user: discord.User, points: int):
         for player in self.players:
-            if id == player.id:
-                return player.points
-        return "noch keine Punkte, da du nicht registriert bist. Benutze /register username und erhalte deine ersten"
+            if player.user == user:
+                player.points = points
+                return
+        player = Player(user, user.name)
+        player.points = points
+        self.players.append(player)
 
-    async def send_question(self):
-        if self.active_question is not None:
-            await self.reveal_answer()
-        self.reset_guesses()
-        if self.count < len(self.questions):
-            self.active_question = self.questions[self.count]
-            await self.send_image_of_question()
-            await self.send_text(self.active_question.question)
-            self.count += 1
-            await self.send_text(str(self.count) + "/" + str(len(self.questions)) + ": " + str(
-                self.active_question.max_guesses) + " guesses")
-        else:
-            await self.end_quiz()
+    async def send_text(self, message: str):
+        for text in message.split("|"):
+            await self.channel.send(text)
 
-    async def start_quiz(self):
-        if self.is_active:
-            return
-        await self.send_text(self.start_message)
-        self.is_active = True
-
-    async def start_quiz_at(self, number):
-        if self.is_active:
-            return
-        self.count = number
-        self.is_active = True
-
-    async def end_quiz(self):
-        for player in self.players:
-            if player.rank == 1:
-                await self.send_text("Herzlichen Glückwunsch " + self.players.name)
-        await self.send_text(self.end_message)
-        self.is_active = False
-
-    async def send_image_of_question(self):
+    async def send_image(self):
         file = Path(self.folder + '/send' + str(self.count) + '.png')
         if file.exists():
             await self.channel.send(file=discord.File(self.folder + "/send" + str(self.count) + ".png"))
 
-    async def send_text(self, message: str):
-        texts = message.split("|")
-        for text in texts:
-            await self.channel.send(text)
+    async def send_question(self):
+        if self.active_question is not None:
+            await self.reveal_answer()
+        if self.count < len(self.questions):
+            self.active_question = self.questions[self.count]
+            self.count += 1
+            await self.send_image()
+            await self.send_text(self.active_question.question)
+            await self.send_text(str(self.count) + "/" + str(len(self.questions)) + ": " + str(
+                self.active_question.max_guesses) + " guesses")
+
+    async def reveal_answer(self):
+        self.reset_guesses()
+        await self.send_text("Die Lösung war: " + self.active_question.answer)
+        await self.send_text("Hints:")
+        for hint in self.active_question.hints:
+            await self.send_text(hint)
+        for player in self.players:
+            await self.send_text(f"{player.rank}. {player.username}: {player.points}")
+        self.active_question = None
+        if self.count == len(self.questions):
+            await self.end_quiz()
 
     def reset_guesses(self):
         for player in self.players:
             player.guesses = 0
             player.correct_today = False
 
+    async def end_quiz(self):
+        for player in self.players:
+            if player.rank == 1:
+                await self.send_text("Herzlichen Glückwunsch " + player.username)
+        await self.send_text(self.end_message)
+        self.is_active = False
+
     async def user_answer(self, user_answer: discord.Message):
         for player in self.players:
-            if user_answer.author.id == player.id:
+            if player.user == user_answer.author:
                 if player.correct_today or self.active_question is None:
                     return
                 if user_answer.content == self.active_question.answer:
-                    self.calc_points(player)
+                    self.calculate_points(player)
                     player.correct_today = True
                     await user_answer.add_reaction('\N{white heavy check mark}')
                     await user_answer.reply(f"Damit hast du nun {player.points} Punkte.")
@@ -116,7 +130,7 @@ class Quiz:
                             await user_answer.reply(self.active_question.hints[x])
                 return
 
-    def calc_points(self, player):
+    def calculate_points(self, player):
         points = 4 - (player.guesses // self.active_question.max_guesses)
         if points < 1:
             return 1
@@ -128,17 +142,7 @@ class Quiz:
                 return
         await self.reveal_answer()
 
-    async def reveal_answer(self):
-        await self.send_text("Die Lösung war: " + self.active_question.answer)
-        await self.send_text("Hints:")
-        for hint in self.active_question.hints:
-            await self.send_text(hint)
-        await self.send_points()
-        self.active_question = None
-        if self.count == len(self.questions):
-            await self.end_quiz()
-
-    async def send_points(self):
+    async def update_table(self):
         self.players.sort(key=lambda x: x.points, reverse=True)
         rank = 1
         for index, player in enumerate(self.players):
@@ -146,19 +150,9 @@ class Quiz:
             for x in range(index):
                 if self.players[x].points == player.points:
                     player.rank = self.players[x].rank
-            await self.send_text(str(player.rank) + ". " + player.name + ": " + str(player.points))
             rank += 1
 
-    def set_points(self, id, points):
+    def points_minus_one(self, user):
         for player in self.players:
-            if player.id == id:
-                player.points = points
-                return player.name
-        player = Player(id, "auto generated bot noob")
-        player.points = points
-        self.players.append(player)
-
-    def points_minus_one(self, id):
-        for player in self.players:
-            if player.id == id:
+            if player.user == user:
                 player.points -= 1
