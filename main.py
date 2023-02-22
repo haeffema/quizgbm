@@ -34,6 +34,7 @@ async def on_message(ctx: discord.Message):
         await quiz.user_answer(ctx)
     if ctx.channel == quiz_channel:
         quiz.points_minus_one(ctx.author)
+        await ctx.delete()
 
 
 @bot.tree.command(name="start")
