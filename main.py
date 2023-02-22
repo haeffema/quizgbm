@@ -67,7 +67,7 @@ async def start(interaction: discord.Interaction):
 @app_commands.describe(number="the number of the question the quiz will be started from")
 async def start_at(interaction: discord.Interaction, number: int):
     if interaction.user == quiz_master and not quiz.is_active:
-        await interaction.response.send_message(f"started quiz at {number}", ephemeral=True)
+        # await interaction.response.send_message(f"started quiz at {number}", ephemeral=True)
         await quiz.start_at(number)
         question.start()
     else:
