@@ -100,7 +100,7 @@ async def set_points(interaction: discord.Interaction, user: discord.User, new_p
 @tasks.loop(hours=24)
 async def question():
     if quiz.is_active:
-        await quiz.send_question()
+        await quiz.send_question(quiz_master)
 
 
 def init():

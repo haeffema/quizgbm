@@ -76,7 +76,7 @@ class Quiz:
         if file.exists():
             await self.channel.send(file=discord.File(self.folder + "/send" + str(self.count) + ".png"))
 
-    async def send_question(self):
+    async def send_question(self, quiz_master: discord.User):
         if self.active_question is not None:
             await self.reveal_answer()
         if self.count < len(self.questions):
@@ -86,6 +86,9 @@ class Quiz:
             await self.send_text(self.active_question.question)
             await self.send_text(str(self.count) + "/" + str(len(self.questions)) + ": " + str(
                 self.active_question.max_guesses) + " guesses")
+            await quiz_master.send("Hints:")
+            for hint in self.active_question.hints:
+                await quiz_master.send(hint)
 
     async def reveal_answer(self):
         self.reset_guesses()
