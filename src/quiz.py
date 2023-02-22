@@ -67,13 +67,13 @@ class Quiz:
         player.points = points
         self.players.append(player)
 
-    def hint(self, user: discord.User):
+    async def hint(self, user: discord.User):
         for player in self.players:
             if player.user == user:
                 player.guesses += self.active_question.max_guesses - player.guesses % self.active_question.max_guesses
                 for x in range(3):
                     if player.guesses == self.active_question.max_guesses * (x + 1):
-                        await user.send("@silent " + self.active_question.hints[x])
+                        await user.send(self.active_question.hints[x])
                         return
 
     async def send_text(self, message: str):
@@ -95,10 +95,10 @@ class Quiz:
             await self.send_text(self.active_question.question)
             await self.send_text(str(self.count) + "/" + str(len(self.questions)) + ": " + str(
                 self.active_question.max_guesses) + " guesses")
-            await quiz_master.send("@silent Hints:")
+            await quiz_master.send("Hints:")
             for hint in self.active_question.hints:
-                await quiz_master.send("@silent " + hint)
-            await quiz_master.send("@silent Lösung: " + self.active_question.answer)
+                await quiz_master.send(hint)
+            await quiz_master.send("Lösung: " + self.active_question.answer)
 
     async def reveal_answer(self):
         self.reset_guesses()
@@ -133,14 +133,14 @@ class Quiz:
                     player.points += self.calculate_points(player)
                     player.correct_today = True
                     await user_answer.add_reaction('\N{white heavy check mark}')
-                    await user_answer.reply(f"@silent Damit hast du nun {player.points} Punkte.")
+                    await user_answer.reply(f"Damit hast du nun {player.points} Punkte.")
                     await self.all_correct_today()
                 else:
                     player.guesses += 1
                     await user_answer.add_reaction('\N{negative squared cross mark}')
                     for x in range(3):
                         if player.guesses == self.active_question.max_guesses * (x + 1):
-                            await user_answer.reply("@silent " + self.active_question.hints[x])
+                            await user_answer.reply(self.active_question.hints[x])
                 return
 
     def calculate_points(self, player):

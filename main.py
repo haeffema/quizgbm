@@ -39,17 +39,17 @@ async def on_message(ctx: discord.Message):
 async def help(interaction: discord.Interaction):
     await interaction.response.send_message("check your dms", ephemeral=True)
     if interaction.user == quiz_master:
-        await interaction.user.send("@silent /start: start the current quiz")
-        await interaction.user.send("@silent /start_at: start the current quiz at the given number")
-        await interaction.user.send("@silent /remove: remove a user from the quiz")
+        await interaction.user.send("/start: start the current quiz")
+        await interaction.user.send("/start_at: start the current quiz at the given number")
+        await interaction.user.send("/remove: remove a user from the quiz")
         await interaction.user.send(
-            "@silent /set_points: update the points for a user. if the user doesnt exist it creates the user with the given points")
-        await interaction.user.send("@silent /send_message: sends the message in the quiz channel")
-    await interaction.user.send("@silent /join: you join the quiz")
-    await interaction.user.send("@silent /update_username: you can change your username so its not the generated username")
+            "/set_points: update the points for a user. if the user doesnt exist it creates the user with the given points")
+        await interaction.user.send("/send_message: sends the message in the quiz channel")
+    await interaction.user.send("/join: you join the quiz")
+    await interaction.user.send("/update_username: you can change your username so its not the generated username")
     await interaction.user.send(
-        "@silent /table: you get the current table. (The guesses a player has today and if the player has correctly answered today)")
-    await interaction.user.send("@silent /hint: you go directly to the next hint")
+        "/table: you get the current table. (The guesses a player has today and if the player has correctly answered today)")
+    await interaction.user.send("/hint: you go directly to the next hint")
 
 
 @bot.tree.command(name="start")
@@ -99,15 +99,16 @@ async def remove(interaction: discord.Interaction, player: discord.User):
 @bot.tree.command(name="hint")
 async def hint(interaction: discord.Interaction):
     await interaction.response.send_message("check your dms :(", ephemeral=True)
-    quiz.hint(interaction.user)
+    await quiz.hint(interaction.user)
 
 
 @bot.tree.command(name="table")
 async def table(interaction: discord.Interaction):
     await interaction.response.send_message("check your dms", ephemeral=True)
+    await quiz.update_table()
     for player in quiz.players:
         await interaction.user.send(
-            f"@silent {player.rank}. {player.username}: {player.points} ({player.guesses} - {player.correct_today})")
+            f"{player.rank}. {player.username}: {player.points} ({player.guesses} - {player.correct_today})")
 
 
 @bot.tree.command(name="set_points")
@@ -131,7 +132,7 @@ async def send_message(interaction: discord.Interaction, message: str):
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
-@tasks.loop(hours=24)
+@tasks.loop(minutes=1)
 async def question():
     if quiz.is_active:
         await quiz.send_question(quiz_master)
