@@ -70,6 +70,11 @@ class Quiz:
     async def hint(self, user: discord.User):
         for player in self.players:
             if player.user == user:
+                if player.correct_today:
+                    await user.send("Hints:")
+                    for hint in self.active_question.hints:
+                        await user.send(hint)
+                    return
                 player.guesses += self.active_question.max_guesses - player.guesses % self.active_question.max_guesses
                 for x in range(3):
                     if player.guesses == self.active_question.max_guesses * (x + 1):
