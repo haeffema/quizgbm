@@ -35,7 +35,7 @@ async def on_message(ctx: discord.Message):
             await ctx.delete()
 
 
-@bot.tree.command(name="help")
+@bot.tree.command(name="help", description="sends you all available commands")
 async def help(interaction: discord.Interaction):
     await interaction.response.send_message("check your dms", ephemeral=True)
     if interaction.user == quiz_master:
@@ -52,7 +52,7 @@ async def help(interaction: discord.Interaction):
     await interaction.user.send("/hint: you go directly to the next hint")
 
 
-@bot.tree.command(name="start")
+@bot.tree.command(name="start", description="starts the quiz normally")
 async def start(interaction: discord.Interaction):
     if interaction.user == quiz_master and not quiz.is_active:
         await interaction.response.send_message(f"started quiz", ephemeral=True)
@@ -62,7 +62,7 @@ async def start(interaction: discord.Interaction):
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
-@bot.tree.command(name="start_at")
+@bot.tree.command(name="start_at", description="starts the quiz at the given number")
 @app_commands.describe(number="the number of the question the quiz will be started from")
 async def start_at(interaction: discord.Interaction, number: int):
     if interaction.user == quiz_master and not quiz.is_active:
@@ -73,20 +73,22 @@ async def start_at(interaction: discord.Interaction, number: int):
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
-@bot.tree.command(name="join")
+@bot.tree.command(name="join", description="the user joins the quiz")
 async def join(interaction: discord.Interaction):
     await interaction.response.send_message(f"welcome to the quiz :)", ephemeral=True)
     quiz.join(interaction.user)
+    await quiz_master.send(f"{interaction.user} joined")
 
 
-@bot.tree.command(name="update_username")
+@bot.tree.command(name="update_username", description="updates your username to the new given")
 @app_commands.describe(username="the new username")
 async def update_username(interaction: discord.Interaction, username: str):
     await interaction.response.send_message(f"updated username to {username}", ephemeral=True)
     quiz.update_username(interaction.user, username)
+    await quiz_master.send(f"{interaction.user} changed name to {username}")
 
 
-@bot.tree.command(name="remove")
+@bot.tree.command(name="remove", description="removes the given player from the quiz")
 @app_commands.describe(player="the player that will be removed")
 async def remove(interaction: discord.Interaction, player: discord.User):
     if interaction.user == quiz_master:
@@ -96,13 +98,14 @@ async def remove(interaction: discord.Interaction, player: discord.User):
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
-@bot.tree.command(name="hint")
+@bot.tree.command(name="hint", description="directly skips to the next hint")
 async def hint(interaction: discord.Interaction):
     await interaction.response.send_message("check your dms :(", ephemeral=True)
     await quiz.hint(interaction.user)
+    await quiz_master.send(f"{interaction.user} used /hint")
 
 
-@bot.tree.command(name="table")
+@bot.tree.command(name="table", description="sends you the table and information who has answered today")
 async def table(interaction: discord.Interaction):
     await interaction.response.send_message("check your dms", ephemeral=True)
     await quiz.update_table()
@@ -111,7 +114,7 @@ async def table(interaction: discord.Interaction):
             f"{player.rank}. {player.username}: {player.points} ({player.guesses} - {player.correct_today})")
 
 
-@bot.tree.command(name="set_points")
+@bot.tree.command(name="set_points", description="changes the points of a given player to the given number")
 @app_commands.describe(user="the player which points will be changed")
 @app_commands.describe(new_points="the new points for the player")
 async def set_points(interaction: discord.Interaction, user: discord.User, new_points: int):
@@ -122,7 +125,7 @@ async def set_points(interaction: discord.Interaction, user: discord.User, new_p
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
-@bot.tree.command(name="send_message")
+@bot.tree.command(name="send_message", description="sends a message from the bot to the quiz channel")
 @app_commands.describe(message="message that will be sent")
 async def send_message(interaction: discord.Interaction, message: str):
     if interaction.user == quiz_master:

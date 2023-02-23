@@ -169,3 +169,4 @@ class Quiz:
         for player in self.players:
             if player.user == user:
                 player.points -= 1
+                return
