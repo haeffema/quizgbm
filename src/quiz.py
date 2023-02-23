@@ -81,6 +81,16 @@ class Quiz:
                         await user.send(self.active_question.hints[x])
                         return
 
+    async def ff(self, user: discord.User):
+        for player in self.players:
+            if player.user == user:
+                player.correct_today = True
+                player.guesses = 999999
+                player.points += 0.5
+                await user.send(
+                    f"Die heutige Lösung war: {self.active_question.answer}. Mit etwas nachdenken hättest du es bestimmt geschafft :(")
+                return
+
     async def send_text(self, message: str):
         for text in message.split("|"):
             await self.channel.send(text)

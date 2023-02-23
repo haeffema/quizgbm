@@ -16,10 +16,10 @@ global quiz
 @bot.event
 async def on_ready():
     init()
-    print(f"logged in as {bot.user}")
+    print(f"angemeldet als {bot.user}")
     try:
         synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} command(s)")
+        print(f"{len(synced)} synced")
     except Exception as e:
         print(e)
 
@@ -50,6 +50,7 @@ async def help(interaction: discord.Interaction):
     await interaction.user.send(
         "/table: you get the current table. (The guesses a player has today and if the player has correctly answered today)")
     await interaction.user.send("/hint: you go directly to the next hint")
+    await interaction.user.send("/ff: you'll get the answer but only get half a point for the day")
 
 
 @bot.tree.command(name="start", description="starts the quiz normally")
@@ -103,6 +104,13 @@ async def hint(interaction: discord.Interaction):
     await interaction.response.send_message("check your dms :(", ephemeral=True)
     await quiz.hint(interaction.user)
     await quiz_master.send(f"{interaction.user} used /hint")
+
+
+@bot.tree.command(name="ff", description="you get the answer but only half a point")
+async def ff(interaction: discord.Interaction):
+    await interaction.response.send_message("check your dms :(", ephemeral=True)
+    await quiz.ff(interaction.user)
+    await quiz_master.send(f"{interaction.user} used /ff")
 
 
 @bot.tree.command(name="table", description="sends you the table and information who has answered today")
