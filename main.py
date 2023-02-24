@@ -99,7 +99,8 @@ async def remove(interaction: discord.Interaction, player: discord.User):
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
-@bot.tree.command(name="hint", description="directly skips to the next hint")
+@bot.tree.command(name="hint",
+                  description="directly skips to the next hint or sends you all hints if your finished already")
 async def hint(interaction: discord.Interaction):
     await interaction.response.send_message("check your dms :(", ephemeral=True)
     await quiz.hint(interaction.user)
