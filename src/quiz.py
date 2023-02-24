@@ -89,6 +89,7 @@ class Quiz:
                 player.points += 0.5
                 await user.send(
                     f"Die heutige Lösung war: {self.active_question.answer}. Mit etwas nachdenken hättest du es bestimmt geschafft :(")
+                await self.all_correct_today()
                 return
 
     async def send_text(self, message: str):
