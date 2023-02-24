@@ -84,6 +84,8 @@ class Quiz:
     async def ff(self, user: discord.User):
         for player in self.players:
             if player.user == user:
+                if player.correct_today:
+                    return
                 player.correct_today = True
                 player.guesses = 999999
                 player.points += 0.5
