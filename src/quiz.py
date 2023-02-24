@@ -142,7 +142,7 @@ class Quiz:
         await self.send_text(self.end_message)
         self.is_active = False
 
-    async def user_answer(self, user_answer: discord.Message):
+    async def user_answer(self, user_answer: discord.Message, quiz_master: discord.User):
         for player in self.players:
             if player.user == user_answer.author:
                 if player.correct_today or self.active_question is None:
@@ -159,6 +159,7 @@ class Quiz:
                     for x in range(3):
                         if player.guesses == self.active_question.max_guesses * (x + 1):
                             await user_answer.reply(self.active_question.hints[x])
+                await quiz_master.send(f"{player.username}: {user_answer.content}")
                 return
 
     def calculate_points(self, player):
