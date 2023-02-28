@@ -29,7 +29,7 @@ async def on_message(ctx: discord.Message):
     if ctx.author != bot.user and ctx.author != quiz_master:
         if type(ctx.channel) is discord.DMChannel:
             await quiz.user_answer(ctx, quiz_master)
-        if ctx.channel == quiz_channel:
+        if ctx.channel == quiz_channel and quiz.is_active:
             quiz.points_minus_one(ctx.author)
             await ctx.delete()
 
