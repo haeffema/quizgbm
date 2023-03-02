@@ -150,7 +150,7 @@ def init():
     table_channel = bot.get_channel(table_channel_id)
     log_channel = bot.get_channel(log_channel_id)
     quiz_master = bot.get_user(quiz_master_id)
-    quiz = Quiz(quiz_channel, folder)
+    quiz = Quiz(quiz_channel, table_channel, log_channel, folder)
 
 
 bot.run(bot_token)
