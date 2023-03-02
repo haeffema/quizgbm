@@ -202,7 +202,7 @@ class Quiz:
         await self.table_channel.purge(limit=len(self.players))
         for player in self.players:
             await self.table_channel.send(
-                f"{player.rank}. {player.username} {player.points}|{player.guesses} - {player.correct_today}")
+                f"{player.rank}. {player.username} {player.points} | {player.guesses} - {player.correct_today}")
 
     def points_minus_one(self, user):
         for player in self.players:
