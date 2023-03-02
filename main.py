@@ -2,13 +2,15 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
-from creds import bot_token, folder, quiz_master_id, quiz_channel_id
+from creds import bot_token, folder, quiz_master_id, quiz_channel_id, table_channel_id, log_channel_id
 from src.quiz import Quiz
 
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 bot.remove_command("help")
 
 global quiz_channel
+global table_channel
+global log_channel
 global quiz_master
 global quiz
 
@@ -29,7 +31,7 @@ async def on_message(ctx: discord.Message):
     if ctx.author != bot.user and ctx.author != quiz_master:
         if type(ctx.channel) is discord.DMChannel:
             await quiz.user_answer(ctx, quiz_master)
-        if ctx.channel == quiz_channel and quiz.is_active:
+        if ctx.channel in [quiz_channel, table_channel, log_channel] and quiz.is_active:
             quiz.points_minus_one(ctx.author)
             await ctx.delete()
 
@@ -46,8 +48,6 @@ async def help(interaction: discord.Interaction):
         await interaction.user.send("/send_message: sends the message in the quiz channel")
     await interaction.user.send("/join: you join the quiz")
     await interaction.user.send("/update_username: you can change your username so its not the generated username")
-    await interaction.user.send(
-        "/table: you get the current table. (The guesses a player has today and if the player has correctly answered today)")
     await interaction.user.send("/hint: you go directly to the next hint")
     await interaction.user.send("/ff: you'll get the answer but only get half a point for the day")
 
@@ -113,15 +113,6 @@ async def ff(interaction: discord.Interaction):
     await quiz_master.send(f"{interaction.user} used /ff")
 
 
-@bot.tree.command(name="table", description="sends you the table and information who has answered today")
-async def table(interaction: discord.Interaction):
-    await interaction.response.send_message("check your dms", ephemeral=True)
-    await quiz.update_table()
-    for player in quiz.players:
-        await interaction.user.send(
-            f"{player.rank}. {player.username}: {player.points} ({player.guesses} - {player.correct_today})")
-
-
 @bot.tree.command(name="set_points", description="changes the points of a given player to the given number")
 @app_commands.describe(user="the player which points will be changed")
 @app_commands.describe(new_points="the new points for the player")
@@ -150,11 +141,15 @@ async def question():
 
 
 def init():
-    global quiz_master
     global quiz_channel
+    global table_channel
+    global log_channel
+    global quiz_master
     global quiz
-    quiz_master = bot.get_user(quiz_master_id)
     quiz_channel = bot.get_channel(quiz_channel_id)
+    table_channel = bot.get_channel(table_channel_id)
+    log_channel = bot.get_channel(log_channel_id)
+    quiz_master = bot.get_user(quiz_master_id)
     quiz = Quiz(quiz_channel, folder)
 
 

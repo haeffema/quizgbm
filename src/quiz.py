@@ -2,16 +2,21 @@ from pathlib import Path
 
 import discord
 
+from src.log import Log
 from src.player import Player
 from src.question import Question
 
 
 class Quiz:
-    def __init__(self, channel: discord.TextChannel, folder: str):
-        self.channel = channel
+    def __init__(self, quiz_channel: discord.TextChannel, table_channel: discord.TextChannel,
+                 log_channel: discord.TextChannel, folder: str):
+        self.quiz_channel = quiz_channel
+        self.table_channel = table_channel
+        self.log_channel = log_channel
         self.folder = folder
         self.players = []
         self.questions = []
+        self.log_list = []
         self.start_message = None
         self.end_message = None
         self.active_question = None
@@ -96,12 +101,12 @@ class Quiz:
 
     async def send_text(self, message: str):
         for text in message.split("|"):
-            await self.channel.send(text)
+            await self.quiz_channel.send(text)
 
     async def send_image(self):
         file = Path(self.folder + '/send' + str(self.count) + '.png')
         if file.exists():
-            await self.channel.send(file=discord.File(self.folder + "/send" + str(self.count) + ".png"))
+            await self.quiz_channel.send(file=discord.File(self.folder + "/send" + str(self.count) + ".png"))
 
     async def send_question(self, quiz_master: discord.User):
         if self.active_question is not None:
@@ -121,14 +126,22 @@ class Quiz:
     async def reveal_answer(self):
         self.reset_guesses()
         await self.send_text("Die Lösung war: " + self.active_question.answer)
-        await self.send_text("Hints:")
-        for hint in self.active_question.hints:
-            await self.send_text(hint)
-        for player in self.players:
-            await self.send_text(f"{player.rank}. {player.username}: {player.points}")
+        await self.log_answers()
         self.active_question = None
+        self.log_list = []
         if self.count == len(self.questions):
             await self.end_quiz()
+
+    async def log_answers(self):
+        self.log_list.sort(key=lambda x: x.hint_number)
+        hint_numbers = [1, 2, 3]
+        await self.log_channel.send(f"Frage: {self.active_question.question}")
+        for log in self.log_list:
+            if log.hint_number in hint_numbers:
+                await self.log_channel.send(f"Hint: {self.active_question.hints[log.hint_number - 1]}")
+                hint_numbers.remove(log.hint_number)
+            await self.log_channel.send(f"{log.player.username}: {log.content}")
+        await self.log_channel.send(f"Lösung: {self.active_question.answer}")
 
     def reset_guesses(self):
         for player in self.players:
@@ -147,6 +160,7 @@ class Quiz:
             if player.user == user_answer.author:
                 if player.correct_today or self.active_question is None:
                     return
+                await self.update_table()
                 if user_answer.content == self.active_question.answer:
                     player.points += self.calculate_points(player)
                     player.correct_today = True
@@ -155,6 +169,8 @@ class Quiz:
                     await self.all_correct_today()
                 else:
                     player.guesses += 1
+                    self.log_list.append(
+                        Log(player, user_answer.content, player.guesses // self.active_question.max_guesses))
                     await user_answer.add_reaction('\N{negative squared cross mark}')
                     for x in range(3):
                         if player.guesses == self.active_question.max_guesses * (x + 1):
@@ -183,6 +199,10 @@ class Quiz:
                 if self.players[x].points == player.points:
                     player.rank = self.players[x].rank
             rank += 1
+        await self.table_channel.purge(limit=len(self.players))
+        for player in self.players:
+            await self.table_channel.send(
+                f"{player.rank}. {player.username} {player.points}|{player.guesses} - {player.correct_today}")
 
     def points_minus_one(self, user):
         for player in self.players:
