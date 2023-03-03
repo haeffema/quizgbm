@@ -137,10 +137,15 @@ class Quiz:
         hint_numbers = [1, 2, 3]
         await self.log_channel.send(f"Frage: {self.active_question.question}")
         for log in self.log_list:
+            while log.hint_number > hint_numbers[0]:
+                await self.log_channel.send(f"Hint: {self.active_question.hints[0]}")
+                hint_numbers.remove(log.hint_number)
             if log.hint_number in hint_numbers:
                 await self.log_channel.send(f"Hint: {self.active_question.hints[log.hint_number - 1]}")
                 hint_numbers.remove(log.hint_number)
             await self.log_channel.send(f"{log.player.username}: {log.content}")
+        for hint_num in hint_numbers:
+            await self.log_channel.send(f"Hint: {self.active_question.hints[hint_num - 1]}")
         await self.log_channel.send(f"Lösung: {self.active_question.answer}")
 
     def reset_guesses(self):
