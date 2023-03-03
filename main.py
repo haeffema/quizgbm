@@ -18,10 +18,9 @@ global quiz
 @bot.event
 async def on_ready():
     init()
-    print(f"angemeldet als {bot.user}")
     try:
         synced = await bot.tree.sync()
-        print(f"{len(synced)} synced")
+        print(f"{bot.user} synced {len(synced)} commands")
     except Exception as e:
         print(e)
 
