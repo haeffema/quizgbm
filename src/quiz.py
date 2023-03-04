@@ -165,7 +165,6 @@ class Quiz:
             if player.user == user_answer.author:
                 if player.correct_today or self.active_question is None:
                     return
-                await self.update_table()
                 if user_answer.content == self.active_question.answer:
                     player.points += self.calculate_points(player)
                     player.correct_today = True
@@ -181,6 +180,7 @@ class Quiz:
                         if player.guesses == self.active_question.max_guesses * (x + 1):
                             await user_answer.reply(self.active_question.hints[x])
                 await quiz_master.send(f"{player.username}: {user_answer.content}")
+                await self.update_table()
                 return
 
     def calculate_points(self, player):
