@@ -132,7 +132,6 @@ class Quiz:
         self.log_list = []
         if self.count == len(self.questions):
             await self.end_quiz()
-        await self.update_table()
 
     async def log_answers(self):
         self.log_list.sort(key=lambda x: x.hint_number)
@@ -208,8 +207,10 @@ class Quiz:
             rank += 1
         await self.table_channel.purge(limit=len(self.players))
         for player in self.players:
-            await self.table_channel.send(
-                f"{player.rank}. {player.username} {player.points} | {player.guesses} - {player.correct_today}")
+            if player.correct_today:
+                await self.table_channel.send(f"{player.rank}. {player.username} {player.points}")
+            else:
+                await self.table_channel.send(f"{player.rank}. {player.username} {player.points} | {player.guesses} - {player.correct_today}")
 
     def points_minus_one(self, user):
         for player in self.players:
