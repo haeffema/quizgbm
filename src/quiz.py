@@ -126,7 +126,6 @@ class Quiz:
 
     async def reveal_answer(self):
         self.reset_guesses()
-        await self.send_text("Die Lösung war: " + self.active_question.answer)
         await self.log_answers()
         self.active_question = None
         self.log_list = []
@@ -173,9 +172,9 @@ class Quiz:
                     await user_answer.reply(f"Damit hast du nun {player.points} Punkte.")
                     await self.all_correct_today()
                 else:
-                    player.guesses += 1
                     self.log_list.append(
                         Log(player, user_answer.content, player.guesses // self.active_question.max_guesses))
+                    player.guesses += 1
                     await user_answer.add_reaction('\N{negative squared cross mark}')
                     for x in range(3):
                         if player.guesses == self.active_question.max_guesses * (x + 1):
@@ -210,7 +209,8 @@ class Quiz:
             if player.correct_today:
                 await self.table_channel.send(f"{player.rank}. {player.username} {player.points}")
             else:
-                await self.table_channel.send(f"{player.rank}. {player.username} {player.points} | {player.guesses} - {player.correct_today}")
+                await self.table_channel.send(
+                    f"{player.rank}. {player.username} {player.points} | {player.guesses} - {player.correct_today}")
 
     def points_minus_one(self, user):
         for player in self.players:
