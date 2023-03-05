@@ -212,7 +212,7 @@ class Quiz:
                 await self.table_channel.send(
                     f"{player.rank}. {player.username} {player.points} | {player.guesses} - {player.correct_today}")
 
-    def points_minus_one(self, user):
+    async def points_minus_one(self, user):
         for player in self.players:
             if player.user == user:
                 player.points -= 1
