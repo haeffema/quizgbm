@@ -97,6 +97,7 @@ class Quiz:
                 await user.send(
                     f"Die heutige Lösung war: {self.active_question.answer}. Mit etwas nachdenken hättest du es bestimmt geschafft :(")
                 await self.all_correct_today()
+                await self.update_table()
                 return
 
     async def send_text(self, message: str):
@@ -131,6 +132,7 @@ class Quiz:
         self.log_list = []
         if self.count == len(self.questions):
             await self.end_quiz()
+        await self.update_table()
 
     async def log_answers(self):
         self.log_list.sort(key=lambda x: x.hint_number)
@@ -213,4 +215,5 @@ class Quiz:
         for player in self.players:
             if player.user == user:
                 player.points -= 1
+                await self.update_table()
                 return
