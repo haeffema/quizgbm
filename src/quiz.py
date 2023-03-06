@@ -139,18 +139,20 @@ class Quiz:
     async def log_answers(self):
         self.log_list.sort(key=lambda x: x.hint_number)
         hint_numbers = [1, 2, 3]
-        await self.log_channel.send(f"Frage: {self.active_question.question}")
+        log_text = ""
+        log_text += f"Frage: {self.active_question.question}\n"
         for log in self.log_list:
             while log.hint_number > hint_numbers[0]:
-                await self.log_channel.send(f"Hint: {self.active_question.hints[0]}")
+                log_text += f"Hint: {self.active_question.hints[0]}\n"
                 hint_numbers.remove(log.hint_number)
             if log.hint_number in hint_numbers:
-                await self.log_channel.send(f"Hint: {self.active_question.hints[log.hint_number - 1]}")
+                log_text += f"Hint: {self.active_question.hints[log.hint_number - 1]}\n"
                 hint_numbers.remove(log.hint_number)
-            await self.log_channel.send(f"{log.player.username}: {log.content}")
+            log_text += f"{log.player.username}: {log.content}\n"
         for hint_num in hint_numbers:
-            await self.log_channel.send(f"Hint: {self.active_question.hints[hint_num - 1]}")
-        await self.log_channel.send(f"Lösung: {self.active_question.answer}")
+            log_text += f"Hint: {self.active_question.hints[hint_num - 1]}\n"
+        log_text += f"Lösung: {self.active_question.answer}\n"
+        await self.log_channel.send(log_text)
 
     def reset_guesses(self):
         for player in self.players:
