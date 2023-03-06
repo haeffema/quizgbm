@@ -218,9 +218,9 @@ class Quiz:
         table_text = ""
         for player in self.players:
             if player.correct_today or self.active_question is None:
-                table_text += f"{player.rank}. {player.username} {player.points}\n"
+                table_text += f"{player.rank}. {player.username}: {player.points}\n"
             else:
-                table_text += f"{player.rank}. {player.username} {player.points} | {player.guesses} - {player.correct_today}\n"
+                table_text += f"{player.rank}. {player.username}: {player.points} | {player.guesses} - {player.correct_today}\n"
         self.table_message = await self.table_channel.send(table_text)
 
     async def points_minus_one(self, user):
