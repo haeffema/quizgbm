@@ -46,22 +46,25 @@ class Quiz:
             self.count = number - 1
             self.is_active = True
 
-    def join(self, user: discord.User):
+    async def join(self, user: discord.User):
         for player in self.players:
             if player.user == user:
                 return
         self.players.append(Player(user, user.name))
+        await self.update_table()
 
-    def update_username(self, user: discord.User, username: str):
+    async def update_username(self, user: discord.User, username: str):
         for player in self.players:
             if player.user == user:
                 player.username = username
+                await self.update_table()
                 return
 
-    def remove(self, user: discord.User):
+    async def remove(self, user: discord.User):
         for player in self.players:
             if player.user == user:
                 self.players.remove(player)
+                await self.update_table()
                 return
 
     async def set_points(self, user: discord.User, points: int):
