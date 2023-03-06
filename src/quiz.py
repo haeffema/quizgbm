@@ -67,10 +67,12 @@ class Quiz:
         for player in self.players:
             if player.user == user:
                 player.points = points
+                await self.update_table()
                 return
         player = Player(user, user.name)
         player.points = points
         self.players.append(player)
+        await self.update_table()
 
     async def hint(self, user: discord.User):
         for player in self.players:
@@ -84,6 +86,7 @@ class Quiz:
                 for x in range(3):
                     if player.guesses == self.active_question.max_guesses * (x + 1):
                         await user.send(self.active_question.hints[x])
+                        await self.update_table()
                         return
 
     async def ff(self, user: discord.User):
@@ -96,8 +99,8 @@ class Quiz:
                 player.points += 0.5
                 await user.send(
                     f"Die heutige Lösung war: {self.active_question.answer}. Mit etwas nachdenken hättest du es bestimmt geschafft :(")
-                await self.all_correct_today()
                 await self.update_table()
+                await self.all_correct_today()
                 return
 
     async def send_text(self, message: str):
@@ -204,6 +207,7 @@ class Quiz:
                 if self.players[x].points == player.points:
                     player.rank = self.players[x].rank
             rank += 1
+        await self.table_channel.purge(limit=len(self.players) * 2)
         await self.table_channel.purge(limit=len(self.players))
         table_text = ""
         for player in self.players:
