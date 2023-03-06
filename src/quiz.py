@@ -205,12 +205,12 @@ class Quiz:
                     player.rank = self.players[x].rank
             rank += 1
         await self.table_channel.purge(limit=len(self.players))
+        table_text = ""
         for player in self.players:
-            if player.correct_today:
-                await self.table_channel.send(f"{player.rank}. {player.username} {player.points}")
+            if player.correct_today or self.active_question is None:
+                table_text += f"{player.rank}. {player.username} {player.points}\n"
             else:
-                await self.table_channel.send(
-                    f"{player.rank}. {player.username} {player.points} | {player.guesses} - {player.correct_today}")
+                table_text += f"{player.rank}. {player.username} {player.points} | {player.guesses} - {player.correct_today}\n"
 
     async def points_minus_one(self, user):
         for player in self.players:
