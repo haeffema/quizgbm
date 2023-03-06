@@ -112,7 +112,7 @@ async def ff(interaction: discord.Interaction):
 async def set_points(interaction: discord.Interaction, user: discord.User, new_points: int):
     if interaction.user == quiz_master:
         await interaction.response.send_message(f"set points of {user.name} to {new_points}", ephemeral=True)
-        quiz.set_points(user, new_points)
+        await quiz.set_points(user, new_points)
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 

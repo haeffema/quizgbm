@@ -64,7 +64,7 @@ class Quiz:
                 self.players.remove(player)
                 return
 
-    def set_points(self, user: discord.User, points: int):
+    async def set_points(self, user: discord.User, points: int):
         for player in self.players:
             if player.user == user:
                 player.points = points
