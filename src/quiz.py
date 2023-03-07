@@ -168,12 +168,13 @@ class Quiz:
         log_text = ""
         log_text += f"Frage: {self.active_question.question}\n"
         for log in self.log_list:
-            while log.hint_number > hint_numbers[0]:
-                log_text += f"Hint: {self.active_question.hints[0]}\n"
-                hint_numbers.remove(log.hint_number)
-            if log.hint_number in hint_numbers:
-                log_text += f"Hint: {self.active_question.hints[log.hint_number - 1]}\n"
-                hint_numbers.remove(log.hint_number)
+            if hint_numbers:
+                while log.hint_number > hint_numbers[0]:
+                    log_text += f"Hint: {self.active_question.hints[0]}\n"
+                    hint_numbers.remove(log.hint_number)
+                if log.hint_number in hint_numbers:
+                    log_text += f"Hint: {self.active_question.hints[log.hint_number - 1]}\n"
+                    hint_numbers.remove(log.hint_number)
             log_text += f"{log.player.username}: {log.content}\n"
         for hint_num in hint_numbers:
             log_text += f"Hint: {self.active_question.hints[hint_num - 1]}\n"

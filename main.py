@@ -1,7 +1,6 @@
 import datetime
 
 import discord
-import pytz
 from discord import app_commands
 from discord.ext import commands, tasks
 
@@ -11,10 +10,8 @@ from src.quiz import Quiz
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 bot.remove_command("help")
 
-de = pytz.timezone('Europe/Berlin')
-
-question_time = datetime.time(hour=0, tzinfo=de)
-reminder_time = datetime.time(hour=20, tzinfo=de)
+question_time = datetime.time(hour=20, minute=35)
+reminder_time = datetime.time(hour=20)
 
 global quiz_channel
 global table_channel
@@ -26,8 +23,6 @@ global quiz
 @bot.event
 async def on_ready():
     init()
-    send_question.start()
-    send_reminder.start()
     try:
         synced = await bot.tree.sync()
         print(f"{bot.user} synced {len(synced)} commands")
@@ -60,6 +55,8 @@ async def start(interaction: discord.Interaction):
     if interaction.user == quiz_master and not quiz.is_active:
         await interaction.response.send_message(f"started quiz", ephemeral=True)
         await quiz.start()
+        send_question.start()
+        send_reminder.start()
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
@@ -70,6 +67,8 @@ async def start_at(interaction: discord.Interaction, number: int):
     if interaction.user == quiz_master and not quiz.is_active:
         await interaction.response.send_message(f"started quiz at {number}", ephemeral=True)
         await quiz.start_at(number)
+        send_question.start()
+        send_reminder.start()
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
@@ -145,8 +144,9 @@ async def send_message(interaction: discord.Interaction, message: str):
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
-@tasks.loop(time=question_time)
+@tasks.loop(time=question_time, reconnect=True)
 async def send_question():
+    print("hello")
     if quiz.is_active:
         await quiz.send_question(quiz_master)
 
