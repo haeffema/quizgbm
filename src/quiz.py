@@ -132,6 +132,14 @@ class Quiz:
             await quiz_master.send("Lösung: " + self.active_question.answer)
             await self.update_table()
 
+    async def send_reminder(self):
+        if self.active_question is None:
+            return
+        for player in self.players:
+            if not player.correct_today:
+                await player.user.send(
+                    "Hey, du solltest heute noch antworten.\nNutze /hint für Hinweise.\nNutze /ff wenn du keine Ahnung hast um wenigstens ein paar Punkte zubekommen.")
+
     async def reveal_answer(self):
         self.reset_guesses()
         await self.log_answers()
