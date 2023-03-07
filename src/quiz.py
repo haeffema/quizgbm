@@ -130,6 +130,7 @@ class Quiz:
             for hint in self.active_question.hints:
                 await quiz_master.send(hint)
             await quiz_master.send("Lösung: " + self.active_question.answer)
+            await self.update_table()
 
     async def reveal_answer(self):
         self.reset_guesses()
@@ -220,7 +221,7 @@ class Quiz:
             if player.correct_today or self.active_question is None:
                 table_text += f"{player.rank}. {player.username}: {player.points}\n"
             else:
-                table_text += f"{player.rank}. {player.username}: {player.points} | {player.guesses} - {player.correct_today}\n"
+                table_text += f"{player.rank}. {player.username}: {player.points} | max. + {self.calculate_points(player)}\n"
         self.table_message = await self.table_channel.send(table_text)
 
     async def points_minus_one(self, user):
