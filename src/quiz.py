@@ -114,7 +114,7 @@ class Quiz:
                     return
                 player.correct_today = True
                 player.guesses = 999999
-                player.points += 0.5
+                player.points += 0.1
                 await user.send(
                     f"Die heutige Lösung war: {self.active_question.answer}. Mit etwas nachdenken hättest du es bestimmt geschafft :(")
                 await self.update_table()
@@ -242,9 +242,15 @@ class Quiz:
         table_text = ""
         for player in self.players:
             if player.correct_today or self.active_question is None:
-                table_text += f"{player.rank}. {player.username}: {player.points}\n"
+                if player.points == int(player.points):
+                    table_text += f"{player.rank}. {player.username}: {int(player.points)}\n"
+                else:
+                    table_text += f"{player.rank}. {player.username}: {player.points}\n"
             else:
-                table_text += f"{player.rank}. {player.username}: {player.points} | max. + {self.calculate_points(player)}\n"
+                if player.points == int(player.points):
+                    table_text += f"{player.rank}. {player.username}: {int(player.points)} | max. + {self.calculate_points(player)}\n"
+                else:
+                    table_text += f"{player.rank}. {player.username}: {player.points} | max. + {self.calculate_points(player)}\n"
         self.table_message = await self.table_channel.send(table_text)
 
     async def points_minus_one(self, user):
