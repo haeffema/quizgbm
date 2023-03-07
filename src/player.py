@@ -8,4 +8,5 @@ class Player:
         self.points = 0
         self.guesses = 0
         self.rank = 1
+        self.strikes = 0
         self.correct_today = False

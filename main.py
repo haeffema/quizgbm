@@ -66,6 +66,13 @@ async def start_at(interaction: discord.Interaction, number: int):
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
+@bot.tree.command(name="strike", description="the player will be striked")
+@app_commands.describe(player="the player that will be striked")
+async def strike(interaction: discord.Interaction, player: discord.User):
+    await interaction.response.send_message(f"{player.name} has been striked", ephemeral=True)
+    await quiz.strike(player)
+
+
 @bot.tree.command(name="join", description="the user joins the quiz")
 async def join(interaction: discord.Interaction):
     await interaction.response.send_message(f"welcome to the quiz :)", ephemeral=True)

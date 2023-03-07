@@ -46,6 +46,20 @@ class Quiz:
             self.count = number - 1
             self.is_active = True
 
+    async def strike(self, user: discord.Member):
+        for player in self.players:
+            if player.user == user:
+                if player.strikes == 0:
+                    await user.send("Das ist dein erster Strike, hier passiert noch nichts.")
+                    player.strikes = 1
+                if player.strikes == 1:
+                    await user.send("Das ist dein zweiter Strike, du verlierst damit alle Punkte.")
+                    player.strikes = 2
+                    player.points = 0
+                if player.strikes == 2:
+                    await user.send("Das ist dein dritter Strike, damit fliegst du aus dem Quiz.")
+                    self.players.remove(player)
+
     async def join(self, user: discord.User):
         for player in self.players:
             if player.user == user:
