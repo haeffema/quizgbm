@@ -10,8 +10,10 @@ from src.quiz import Quiz
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 bot.remove_command("help")
 
-question_time = datetime.time(hour=20, minute=35)
-reminder_time = datetime.time(hour=20)
+question_time = datetime.time(hour=23)
+reminder_time = datetime.time(hour=19)
+
+# 1 hour behind -> needs to be fixed with timezone
 
 global quiz_channel
 global table_channel
@@ -146,7 +148,6 @@ async def send_message(interaction: discord.Interaction, message: str):
 
 @tasks.loop(time=question_time, reconnect=True)
 async def send_question():
-    print("hello")
     if quiz.is_active:
         await quiz.send_question(quiz_master)
 
