@@ -87,9 +87,9 @@ class Quiz:
                         await user.send(hint)
                     return
                 player.guesses += self.active_question.max_guesses - player.guesses % self.active_question.max_guesses
-                for x in range(3):
-                    if player.guesses == self.active_question.max_guesses * (x + 1):
-                        await user.send(self.active_question.hints[x])
+                for count in range(3):
+                    if player.guesses == self.active_question.max_guesses * (count + 1):
+                        await user.send(self.active_question.hints[count])
                         await self.update_table()
                         return
 
@@ -186,9 +186,9 @@ class Quiz:
                         Log(player, user_answer.content, player.guesses // self.active_question.max_guesses))
                     player.guesses += 1
                     await user_answer.add_reaction('\N{negative squared cross mark}')
-                    for x in range(3):
-                        if player.guesses == self.active_question.max_guesses * (x + 1):
-                            await user_answer.reply(self.active_question.hints[x])
+                    for count in range(3):
+                        if player.guesses == self.active_question.max_guesses * (count + 1):
+                            await user_answer.reply(self.active_question.hints[count])
                 await quiz_master.send(f"{player.username}: {user_answer.content}")
                 await self.update_table()
                 return
@@ -206,13 +206,13 @@ class Quiz:
         await self.reveal_answer()
 
     async def update_table(self):
-        self.players.sort(key=lambda x: x.points, reverse=True)
+        self.players.sort(key=lambda player_to_sort: player_to_sort.points, reverse=True)
         rank = 1
         for index, player in enumerate(self.players):
             player.rank = rank
-            for x in range(index):
-                if self.players[x].points == player.points:
-                    player.rank = self.players[x].rank
+            for count in range(index):
+                if self.players[count].points == player.points:
+                    player.rank = self.players[count].rank
             rank += 1
         if self.table_message is not None:
             await self.table_message.delete()
