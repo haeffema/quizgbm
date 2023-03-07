@@ -81,7 +81,7 @@ class Quiz:
                 await self.update_table()
                 return
 
-    async def set_points(self, user: discord.User, points: int):
+    async def set_points(self, user: discord.User, points: float):
         for player in self.players:
             if player.user == user:
                 player.points = points

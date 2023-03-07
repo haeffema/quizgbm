@@ -128,7 +128,7 @@ async def ff(interaction: discord.Interaction):
 @bot.tree.command(name="set_points", description="changes the points of a given player to the given number")
 @app_commands.describe(user="the player which points will be changed")
 @app_commands.describe(new_points="the new points for the player")
-async def set_points(interaction: discord.Interaction, user: discord.User, new_points: int):
+async def set_points(interaction: discord.Interaction, user: discord.User, new_points: float):
     if interaction.user == quiz_master:
         await interaction.response.send_message(f"set points of {user.name} to {new_points}", ephemeral=True)
         await quiz.set_points(user, new_points)
