@@ -202,7 +202,10 @@ class Quiz:
                     player.points += self.calculate_points(player)
                     player.correct_today = True
                     await user_answer.add_reaction('\N{white heavy check mark}')
-                    await user_answer.reply(f"Damit hast du nun {player.points} Punkte.")
+                    if player.points == int(player.points):
+                        await user_answer.reply(f"Damit hast du nun {int(player.points)} Punkte.")
+                    else:
+                        await user_answer.reply(f"Damit hast du nun {player.points} Punkte.")
                     await self.all_correct_today()
                 else:
                     self.log_list.append(
