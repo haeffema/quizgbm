@@ -255,13 +255,15 @@ class Quiz:
                     table_text += f"{player.rank}. {player.username}: {int(player.points)} | max. + {self.calculate_points(player)}\n"
                 else:
                     table_text += f"{player.rank}. {player.username}: {player.points} | max. + {self.calculate_points(player)}\n"
-        if self.table_message.content is None and table_text != "":
-            self.table_message = await self.table_channel.send(table_text)
         if self.table_message is not None:
             await self.table_message.delete()
         if table_text != "" and self.table_message is not None:
             if table_text != self.table_message.content:
                 self.table_message = await self.table_channel.send(table_text)
+                return
+        if self.table_message is None and table_text != "":
+            self.table_message = await self.table_channel.send(table_text)
+
 
     async def points_minus_one(self, user):
         for player in self.players:
