@@ -237,8 +237,6 @@ class Quiz:
                 if self.players[count].points == player.points:
                     player.rank = self.players[count].rank
             rank += 1
-        if self.table_message is not None:
-            await self.table_message.delete()
         table_text = ""
         for player in self.players:
             if player.correct_today or self.active_question is None:
@@ -251,7 +249,12 @@ class Quiz:
                     table_text += f"{player.rank}. {player.username}: {int(player.points)} | max. + {self.calculate_points(player)}\n"
                 else:
                     table_text += f"{player.rank}. {player.username}: {player.points} | max. + {self.calculate_points(player)}\n"
-        self.table_message = await self.table_channel.send(table_text)
+        if self.table_message.content == table_text:
+            return
+        if self.table_message is not None:
+            await self.table_message.delete()
+        if table_text != "":
+            self.table_message = await self.table_channel.send(table_text)
 
     async def points_minus_one(self, user):
         for player in self.players:
