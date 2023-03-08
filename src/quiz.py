@@ -208,8 +208,11 @@ class Quiz:
                         await user_answer.reply(f"Damit hast du nun {player.points} Punkte.")
                     await self.all_correct_today()
                 else:
-                    self.log_list.append(
-                        Log(player, user_answer.content, player.guesses // self.active_question.max_guesses))
+                    if player.guesses // self.active_question.max_guesses < 3:
+                        self.log_list.append(
+                            Log(player, user_answer.content, player.guesses // self.active_question.max_guesses))
+                    else:
+                        self.log_list.append(Log(player, user_answer.content, 3))
                     player.guesses += 1
                     await user_answer.add_reaction('\N{negative squared cross mark}')
                     for count in range(3):
@@ -252,12 +255,13 @@ class Quiz:
                     table_text += f"{player.rank}. {player.username}: {int(player.points)} | max. + {self.calculate_points(player)}\n"
                 else:
                     table_text += f"{player.rank}. {player.username}: {player.points} | max. + {self.calculate_points(player)}\n"
-        if self.table_message.content == table_text:
-            return
+        if self.table_message.content is None and table_text != "":
+            self.table_message = await self.table_channel.send(table_text)
         if self.table_message is not None:
             await self.table_message.delete()
-        if table_text != "":
-            self.table_message = await self.table_channel.send(table_text)
+        if table_text != "" and self.table_message is not None:
+            if table_text != self.table_message.content:
+                self.table_message = await self.table_channel.send(table_text)
 
     async def points_minus_one(self, user):
         for player in self.players:
