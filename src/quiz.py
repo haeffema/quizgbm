@@ -130,6 +130,8 @@ class Quiz:
         file = Path(self.folder + '/send' + str(self.count) + '.png')
         if file.exists():
             await self.quiz_channel.send(file=discord.File(self.folder + "/send" + str(self.count) + ".png"))
+            for player in self.players:
+                await player.user.send(file=discord.File(self.folder + "/send" + str(self.count) + ".png"))
 
     async def send_question(self, quiz_master: discord.User):
         if self.active_question is not None:
@@ -139,6 +141,8 @@ class Quiz:
             self.count += 1
             await self.send_image()
             await self.send_text(self.active_question.question)
+            for player in self.players:
+                await player.user.send(self.active_question.question)
             await self.send_text(str(self.count) + "/" + str(len(self.questions)) + ": " + str(
                 self.active_question.max_guesses) + " guesses")
             await quiz_master.send("Hints:")
