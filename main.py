@@ -10,21 +10,22 @@ from src.quiz import Quiz
 bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
 bot.remove_command("help")
 
-question_time = datetime.time(hour=23)
-reminder_time = datetime.time(hour=19)
-
-# 1 hour behind -> needs to be fixed with timezone
-
 global quiz_channel
 global table_channel
 global log_channel
 global quiz_master
 global quiz
 
+question_hour = 0
+reminder_hour = 20
+
 
 @bot.event
 async def on_ready():
     init()
+    fix_clock_format.start()
+    send_question.start()
+    send_reminder.start()
     try:
         synced = await bot.tree.sync()
         print(f"{bot.user} synced {len(synced)} commands")
@@ -57,8 +58,6 @@ async def start(interaction: discord.Interaction):
     if interaction.user == quiz_master and not quiz.is_active:
         await interaction.response.send_message(f"started quiz", ephemeral=True)
         await quiz.start()
-        send_question.start()
-        send_reminder.start()
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
@@ -69,8 +68,6 @@ async def start_at(interaction: discord.Interaction, number: int):
     if interaction.user == quiz_master and not quiz.is_active:
         await interaction.response.send_message(f"started quiz at {number}", ephemeral=True)
         await quiz.start_at(number)
-        send_question.start()
-        send_reminder.start()
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
@@ -146,13 +143,30 @@ async def send_message(interaction: discord.Interaction, message: str):
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
-@tasks.loop(time=question_time, reconnect=True)
+@tasks.loop(minutes=15)
+async def fix_clock_format():
+    diff = datetime.datetime.utcnow().hour - datetime.datetime.now().hour
+    if send_question.is_running():
+        send_question.change_interval(time=datetime.time(hour=calc_time(question_hour + diff)))
+    if send_reminder.is_running():
+        send_reminder.change_interval(time=datetime.time(hour=calc_time(reminder_hour + diff)))
+
+
+def calc_time(time):
+    while time > 23:
+        time -= 24
+    while time < 0:
+        time += 24
+    return time
+
+
+@tasks.loop(hours=1000, reconnect=True)
 async def send_question():
     if quiz.is_active:
         await quiz.send_question(quiz_master)
 
 
-@tasks.loop(time=reminder_time)
+@tasks.loop(hours=1000, reconnect=True)
 async def send_reminder():
     if quiz.is_active:
         await quiz.send_reminder()
