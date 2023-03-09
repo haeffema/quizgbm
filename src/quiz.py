@@ -50,15 +50,18 @@ class Quiz:
         for player in self.players:
             if player.user == user:
                 if player.strikes == 0:
-                    await user.send("Das ist dein erster Strike, hier passiert noch nichts.")
+                    await user.send("Das ist dein erster Strike, beim nächsten verlierst du alle Punkte.")
                     player.strikes = 1
                 if player.strikes == 1:
-                    await user.send("Das ist dein zweiter Strike, du verlierst damit alle Punkte.")
+                    await user.send(
+                        "Das ist dein zweiter Strike, du verlierst damit alle Punkte. Sollte nochmal etwas auffällig sein bist du raus.")
                     player.strikes = 2
                     player.points = 0
                 if player.strikes == 2:
                     await user.send("Das ist dein dritter Strike, damit fliegst du aus dem Quiz.")
                     self.players.remove(player)
+                await self.update_table()
+                return
 
     async def join(self, user: discord.User):
         for player in self.players:
@@ -113,10 +116,8 @@ class Quiz:
                 if player.correct_today:
                     return
                 player.correct_today = True
-                player.guesses = 999999
                 player.points += 0.1
-                await user.send(
-                    f"Die heutige Lösung war: {self.active_question.answer}. Mit etwas nachdenken hättest du es bestimmt geschafft :(")
+                await user.send(f"Die heutige Lösung war: {self.active_question.answer}.")
                 await self.update_table()
                 await self.all_correct_today()
                 return
@@ -152,7 +153,7 @@ class Quiz:
         for player in self.players:
             if not player.correct_today:
                 await player.user.send(
-                    "Hey, du solltest heute noch antworten.\nNutze /hint für Hinweise.\nNutze /ff wenn du keine Ahnung hast um wenigstens ein paar Punkte zubekommen.")
+                    "Hey, du solltest heute noch antworten.\nNutze /hint für Hinweise.\nNutze /ff wenn du keine Ahnung hast.")
 
     async def reveal_answer(self):
         self.reset_guesses()
@@ -263,7 +264,6 @@ class Quiz:
                 return
         if self.table_message is None and table_text != "":
             self.table_message = await self.table_channel.send(table_text)
-
 
     async def points_minus_one(self, user):
         for player in self.players:
