@@ -15,9 +15,8 @@ global table_channel
 global log_channel
 global quiz_master
 global quiz
-
-question_hour = 0
-reminder_hour = 20
+global question_hour
+global reminder_hour
 
 
 @bot.event
@@ -72,10 +71,24 @@ async def start_at(interaction: discord.Interaction, number: int):
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
 
+@bot.tree.command(name="change_time", description="allows the quiz master zu change the hour of question and reminder standard times are 0 and 20")
+@app_commands.describe(quiz="the hour the quiz will be sent")
+@app_commands.describe(reminder="the hour the reminder will be sent")
+async def change_time(interaction: discord.Interaction, quiz: int, reminder: int):
+    if interaction.user == quiz_master:
+        await interaction.response.send_message(f"questions now at {quiz}, reminder at {reminder}", ephemeral=True)
+        global question_hour
+        global reminder_hour
+        question_hour = quiz
+        reminder_hour = reminder
+    else:
+        await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
+
+
 @bot.tree.command(name="strike", description="the player will be striked")
 @app_commands.describe(player="the player that will be striked")
 async def strike(interaction: discord.Interaction, player: discord.User):
-    if interaction.user == quiz_master and not quiz.is_active:
+    if interaction.user == quiz_master:
         await interaction.response.send_message(f"{player.name} has been striked", ephemeral=True)
         await quiz.strike(player)
     else:
@@ -178,11 +191,15 @@ def init():
     global log_channel
     global quiz_master
     global quiz
+    global question_hour
+    global reminder_hour
     quiz_channel = bot.get_channel(quiz_channel_id)
     table_channel = bot.get_channel(table_channel_id)
     log_channel = bot.get_channel(log_channel_id)
     quiz_master = bot.get_user(quiz_master_id)
     quiz = Quiz(quiz_channel, table_channel, log_channel, folder)
+    question_hour = 0
+    reminder_hour = 20
 
 
 bot.run(bot_token)
