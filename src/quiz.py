@@ -49,17 +49,17 @@ class Quiz:
     async def strike(self, user: discord.Member):
         for player in self.players:
             if player.user == user:
-                if player.strikes == 0:
-                    await user.send("Das ist dein erster Strike, beim nächsten verlierst du alle Punkte.")
-                    player.strikes = 1
+                if player.strikes == 2:
+                    await user.send("Das ist dein dritter Strike, damit fliegst du aus dem Quiz.")
+                    self.players.remove(player)
                 if player.strikes == 1:
                     await user.send(
                         "Das ist dein zweiter Strike, du verlierst damit alle Punkte. Sollte nochmal etwas auffällig sein bist du raus.")
                     player.strikes = 2
                     player.points = 0
-                if player.strikes == 2:
-                    await user.send("Das ist dein dritter Strike, damit fliegst du aus dem Quiz.")
-                    self.players.remove(player)
+                if player.strikes == 0:
+                    await user.send("Das ist dein erster Strike, beim nächsten verlierst du alle Punkte.")
+                    player.strikes = 1
                 await self.update_table()
                 return
 
