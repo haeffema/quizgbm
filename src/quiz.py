@@ -46,19 +46,18 @@ class Quiz:
             self.count = number - 1
             self.is_active = True
 
-    async def strike(self, user: discord.Member):
+    async def strike(self, user: discord.Member, reason: str):
         for player in self.players:
             if player.user == user:
                 if player.strikes == 2:
-                    await user.send("Das ist dein dritter Strike, damit fliegst du aus dem Quiz.")
+                    await user.send(f"{reason}: damit bist du aus dem Quiz.")
                     self.players.remove(player)
                 if player.strikes == 1:
-                    await user.send(
-                        "Das ist dein zweiter Strike, du verlierst damit alle Punkte. Sollte nochmal etwas auffällig sein bist du raus.")
+                    await user.send(f"{reason}: damit verlierst du alle Punkte.")
                     player.strikes = 2
                     player.points = 0
                 if player.strikes == 0:
-                    await user.send("Das ist dein erster Strike, beim nächsten verlierst du alle Punkte.")
+                    await user.send(f"{reason}: hier passiert noch nichts.")
                     player.strikes = 1
                 await self.update_table()
                 return

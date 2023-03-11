@@ -78,10 +78,11 @@ async def change_time(interaction: discord.Interaction, question: int, reminder:
 
 @bot.tree.command(name="strike", description="the player will receive a strike")
 @app_commands.describe(player="the player")
-async def strike(interaction: discord.Interaction, player: discord.User):
+@app_commands.describe(reason="the reason")
+async def strike(interaction: discord.Interaction, player: discord.User, reason: str):
     if interaction.user == quiz_master:
-        await interaction.response.send_message(f"{player.name} has received a strike", ephemeral=True)
-        await quiz.strike(player)
+        await interaction.response.send_message(f"{player.name} has received a strike for {reason}", ephemeral=True)
+        await quiz.strike(player, reason)
     else:
         await interaction.response.send_message("you are not the quiz-master", ephemeral=True)
 
