@@ -240,6 +240,8 @@ class Quiz:
         await self.reveal_answer()
 
     async def update_table(self):
+        if self.table_message is not None:
+            await self.table_message.delete()
         self.players.sort(key=lambda player_to_sort: player_to_sort.points, reverse=True)
         rank = 1
         for index, player in enumerate(self.players):
@@ -260,8 +262,6 @@ class Quiz:
                     table_text += f"{player.rank}. {player.username}: {int(player.points)} | max. + {self.calculate_points(player)}\n"
                 else:
                     table_text += f"{player.rank}. {player.username}: {player.points} | max. + {self.calculate_points(player)}\n"
-        if self.table_message is not None:
-            await self.table_message.delete()
         if table_text != "":
             self.table_message = await self.table_channel.send(table_text)
 
