@@ -167,22 +167,19 @@ class Quiz:
             await self.end_quiz()
 
     async def log_answers(self):
+        file = Path(self.folder + '/send' + str(self.count) + '.png')
+        if file.exists():
+            await self.log_channel.send(file=discord.File(self.folder + "/send" + str(self.count) + ".png"))
         self.log_list.sort(key=lambda x: x.hint_number)
-        hint_numbers = [1, 2, 3]
-        log_text = ""
-        log_text += f"Frage: {self.active_question.question}\n"
+        hint_numbers = [0, 1, 2]
+        log_text = f"{self.active_question.question}\n"
         for log in self.log_list:
-            if hint_numbers:
-                number = hint_numbers[0]
-                while log.hint_number > number:
-                    log_text += f"Hint: {self.active_question.hints[number - 1]}\n"
-                    hint_numbers.remove(number)
-                if log.hint_number == number:
-                    log_text += f"Hint: {self.active_question.hints[number - 1]}\n"
-                    hint_numbers.remove(number)
-            log_text += f"{log.player.username}: {log.content}\n"
+            while log.hint_number > hint_numbers[0]:
+                log_text += f"Hint {log.hint_number + 1}: {self.active_question[log.hint_number]}"
+                hint_numbers.remove(hint_numbers[0])
+            log_text += f"{log.player.username}: {log.content}"
         for hint_num in hint_numbers:
-            log_text += f"Hint: {self.active_question.hints[hint_num - 1]}\n"
+            log_text += f"Hint: {self.active_question.hints[hint_num]}\n"
         log_text += f"Lösung: {self.active_question.answer}\n"
         await self.log_channel.send(log_text)
 
@@ -217,7 +214,7 @@ class Quiz:
                         self.log_list.append(
                             Log(player, user_answer.content, player.guesses // self.active_question.max_guesses))
                     else:
-                        self.log_list.append(Log(player, user_answer.content, 3))
+                        self.log_list.append(Log(player, user_answer.content, 2))
                     player.guesses += 1
                     await user_answer.add_reaction('\N{negative squared cross mark}')
                     for count in range(3):
