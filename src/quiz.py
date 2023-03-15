@@ -175,7 +175,7 @@ class Quiz:
         log_text = f"{self.active_question.question}\n"
         for log in self.log_list:
             while log.hint_number > hint_numbers[0]:
-                log_text += f"Hint {log.hint_number + 1}: {self.active_question[log.hint_number]}"
+                log_text += f"Hint {log.hint_number + 1}: {self.active_question.hints[log.hint_number]}"
                 hint_numbers.remove(hint_numbers[0])
             log_text += f"{log.player.username}: {log.content}"
         for hint_num in hint_numbers:
