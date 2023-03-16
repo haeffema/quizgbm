@@ -131,6 +131,7 @@ class Quiz:
             embed.set_image(url='attachment://' + filename)
             await receiver.send(embed=embed, file=dc_file)
         else:
+            embed.add_field(name="", value="")
             await receiver.send(embed=embed)
 
     async def send_hints(self, user):
