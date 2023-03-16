@@ -98,13 +98,11 @@ class Quiz:
         for player in self.players:
             if player.user == user:
                 if player.correct_today:
-                    await user.send("Hints:")
-                    for hint in self.active_question.hints:
-                        await user.send(hint)
-                    return
+                    await self.send_hints(user)
                 player.guesses += self.active_question.max_guesses - player.guesses % self.active_question.max_guesses
                 for count in range(3):
                     if player.guesses == self.active_question.max_guesses * (count + 1):
+                        self.log_list.append(Log(player, "used /hint", (player.guesses - 1) // self.active_question.max_guesses))
                         await user.send(self.active_question.hints[count])
                         await self.update_table()
                         return
@@ -134,7 +132,7 @@ class Quiz:
             await self.send_question_embed(self.quiz_channel)
             for player in self.players:
                 await self.send_question_embed(player.user)
-            await self.send_quiz_master_hints(quiz_master)
+            await self.send_hints(quiz_master)
             await self.update_table()
 
     async def send_question_embed(self, receiver):
@@ -150,12 +148,12 @@ class Quiz:
         else:
             await receiver.send(embed=embed)
 
-    async def send_quiz_master_hints(self, quiz_master):
+    async def send_hints(self, user):
         message = "Hints:\n"
         for hint in self.active_question.hints:
             message += f"{hint}\n"
         message += f"Lösung: {self.active_question.answer}"
-        await quiz_master.send(message)
+        await user.send(message)
 
     async def send_reminder(self):
         if self.active_question is None:
