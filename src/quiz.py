@@ -125,30 +125,37 @@ class Quiz:
         for text in message.split("|"):
             await self.quiz_channel.send(text)
 
-    async def send_image(self):
-        file = Path(self.folder + '/send' + str(self.count) + '.png')
-        if file.exists():
-            await self.quiz_channel.send(file=discord.File(self.folder + "/send" + str(self.count) + ".png"))
-            for player in self.players:
-                await player.user.send(file=discord.File(self.folder + "/send" + str(self.count) + ".png"))
-
     async def send_question(self, quiz_master: discord.User):
         if self.active_question is not None:
             await self.reveal_answer()
         if self.count < len(self.questions):
             self.active_question = self.questions[self.count]
             self.count += 1
-            await self.send_image()
-            await self.send_text(self.active_question.question)
+            await self.send_question_embed(self.quiz_channel)
             for player in self.players:
-                await player.user.send(self.active_question.question)
-            await self.send_text(str(self.count) + "/" + str(len(self.questions)) + ": " + str(
-                self.active_question.max_guesses) + " guesses")
-            await quiz_master.send("Hints:")
-            for hint in self.active_question.hints:
-                await quiz_master.send(hint)
-            await quiz_master.send("Lösung: " + self.active_question.answer)
+                await self.send_question_embed(player.user)
+            await self.send_quiz_master_hints(quiz_master)
             await self.update_table()
+
+    async def send_question_embed(self, receiver):
+        question = self.active_question.question.split(':')
+        filename = self.folder + '/send' + str(self.count) + '.png'
+        description = question[1] + f"\n{self.count} / {len(self.questions)}: {self.active_question.max_guesses}"
+        file = Path(filename)
+        embed = discord.Embed(title=question[0], description=description)
+        if file.exists():
+            dc_file = discord.File(filename)
+            embed.set_image(url='attachment://' + filename)
+            await receiver.send(embed=embed, file=dc_file)
+        else:
+            await receiver.send(embed=embed)
+
+    async def send_quiz_master_hints(self, quiz_master):
+        message = "Hints:\n"
+        for hint in self.active_question.hints:
+            message += f"{hint}\n"
+        message += f"Lösung: {self.active_question.answer}"
+        await quiz_master.send(message)
 
     async def send_reminder(self):
         if self.active_question is None:

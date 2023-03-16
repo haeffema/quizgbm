@@ -21,10 +21,6 @@ global reminder_hour
 
 @bot.event
 async def on_ready():
-    init()
-    fix_clock_format.start()
-    send_question.start()
-    send_reminder.start()
     try:
         synced = await bot.tree.sync()
         print(f"{bot.user} synced {len(synced)} commands")
@@ -89,17 +85,19 @@ async def strike(interaction: discord.Interaction, player: discord.User, reason:
 
 @bot.tree.command(name="join", description="you join the quiz")
 async def join(interaction: discord.Interaction):
-    await interaction.response.send_message(f"welcome to the quiz :)", ephemeral=True)
-    await quiz.join(interaction.user)
-    await quiz_master.send(f"{interaction.user} joined")
+    if interaction.user != quiz_master:
+        await interaction.response.send_message(f"welcome to the quiz :)", ephemeral=True)
+        await quiz.join(interaction.user)
+        await quiz_master.send(f"{interaction.user} joined")
 
 
 @bot.tree.command(name="update_username", description="updates your username")
 @app_commands.describe(username="the new username")
 async def update_username(interaction: discord.Interaction, username: str):
-    await interaction.response.send_message(f"updated username to {username}", ephemeral=True)
-    await quiz.update_username(interaction.user, username)
-    await quiz_master.send(f"{interaction.user} changed name to {username}")
+    if interaction.user != quiz_master:
+        await interaction.response.send_message(f"updated username to {username}", ephemeral=True)
+        await quiz.update_username(interaction.user, username)
+        await quiz_master.send(f"{interaction.user} changed name to {username}")
 
 
 @bot.tree.command(name="remove", description="removes the user from the quiz")
@@ -114,16 +112,18 @@ async def remove(interaction: discord.Interaction, user: discord.User):
 
 @bot.tree.command(name="hint", description="skips to the next hint. if finished sends you all the hints")
 async def hint(interaction: discord.Interaction):
-    await interaction.response.send_message("check your dms", ephemeral=True)
-    await quiz.hint(interaction.user)
-    await quiz_master.send(f"{interaction.user} used /hint")
+    if interaction.user != quiz_master:
+        await interaction.response.send_message("check your dms", ephemeral=True)
+        await quiz.hint(interaction.user)
+        await quiz_master.send(f"{interaction.user} used /hint")
 
 
 @bot.tree.command(name="ff", description="you'll get the answer but only .1 point")
 async def ff(interaction: discord.Interaction):
-    await interaction.response.send_message("check your dms", ephemeral=True)
-    await quiz.ff(interaction.user)
-    await quiz_master.send(f"{interaction.user} used /ff")
+    if interaction.user != quiz_master:
+        await interaction.response.send_message("check your dms", ephemeral=True)
+        await quiz.ff(interaction.user)
+        await quiz_master.send(f"{interaction.user} used /ff")
 
 
 @bot.tree.command(name="set_points", description="changes the points of a user")
@@ -176,19 +176,24 @@ async def send_reminder():
 
 def init():
     global quiz_channel
-    global table_channel
-    global log_channel
-    global quiz_master
-    global quiz
-    global question_hour
-    global reminder_hour
     quiz_channel = bot.get_channel(quiz_channel_id)
+    global table_channel
     table_channel = bot.get_channel(table_channel_id)
+    global log_channel
     log_channel = bot.get_channel(log_channel_id)
+    global quiz_master
     quiz_master = bot.get_user(quiz_master_id)
+    global quiz
     quiz = Quiz(quiz_channel, table_channel, log_channel, folder)
+    global question_hour
     question_hour = 0
+    global reminder_hour
     reminder_hour = 20
 
 
-bot.run(bot_token)
+if __name__ == '__main__':
+    bot.run(bot_token)
+    init()
+    fix_clock_format.start()
+    send_question.start()
+    send_reminder.start()
