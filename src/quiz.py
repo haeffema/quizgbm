@@ -121,12 +121,13 @@ class Quiz:
         await self.update_table()
 
     async def send_question_embed(self, receiver):
-        filename = self.folder + '/send' + str(self.count) + '.png'
-        description = self.active_question.question + f"\n{self.count} / {len(self.questions)}: {self.active_question.max_guesses}"
-        file = Path(filename)
+        filename = 'send' + str(self.count) + '.png'
+        file_location = self.folder + "/" + filename
+        description = self.active_question.question + f"\n{self.count}/{len(self.questions)}: {self.active_question.max_guesses} guesses"
+        file = Path(file_location)
         embed = discord.Embed(title=self.active_question.category, description=description)
         if file.exists():
-            dc_file = discord.File(filename)
+            dc_file = discord.File(file_location)
             embed.set_image(url='attachment://' + filename)
             await receiver.send(embed=embed, file=dc_file)
         else:
@@ -156,10 +157,11 @@ class Quiz:
             await self.end_quiz()
 
     async def log_answers(self):
-        filename = self.folder + '/send' + str(self.count) + '.png'
-        file = Path(filename)
+        filename = 'send' + str(self.count) + '.png'
+        file_location = self.folder + "/" + filename
+        file = Path(file_location)
         self.log_list.sort(key=lambda x: x.hint_number)
-        hint_numbers = [0, 1, 2]
+        hint_numbers = [0, 1, 2, 3]
         embed = discord.Embed(title=self.active_question.category, description=self.active_question.question)
         users_str = ""
         answers_str = ""
@@ -171,17 +173,21 @@ class Quiz:
                     users_str = ""
                     answers_str = ""
                 embed.add_field(name="",
-                                value=f"Hint {log.hint_number + 1}: {self.active_question.hints[log.hint_number]}",
+                                value=f"Hint {log.hint_number}: {self.active_question.hints[log.hint_number - 1]}",
                                 inline=False)
                 hint_numbers.remove(hint_numbers[0])
             users_str += f"{log.player.username}\n"
             answers_str += f"{log.content}\n"
+        if users_str != "" and answers_str != "":
+            embed.add_field(name="", value=users_str, inline=True)
+            embed.add_field(name="", value=answers_str, inline=True)
+            hint_numbers.remove(hint_numbers[0])
         for hint_num in hint_numbers:
-            embed.add_field(name="", value=f"Hint {hint_num + 1}: {self.active_question.hints[hint_num]}",
+            embed.add_field(name="", value=f"Hint {hint_num + 1}: {self.active_question.hints[hint_num - 1]}",
                             inline=False)
         embed.add_field(name=self.active_question.answer, value="", inline=False)
         if file.exists():
-            dc_file = discord.File(filename)
+            dc_file = discord.File(file_location)
             embed.set_image(url='attachment://' + filename)
             await self.log_channel.send(embed=embed, file=dc_file)
         else:
@@ -215,7 +221,7 @@ class Quiz:
                         self.log_list.append(
                             Log(player, user_answer.content, player.guesses // self.active_question.max_guesses))
                     else:
-                        self.log_list.append(Log(player, user_answer.content, 2))
+                        self.log_list.append(Log(player, user_answer.content, 3))
                     player.guesses += 1
                     await user_answer.add_reaction('\N{negative squared cross mark}')
                     for count in range(3):
