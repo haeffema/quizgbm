@@ -21,6 +21,7 @@ global reminder_hour
 
 @bot.event
 async def on_ready():
+    init()
     try:
         synced = await bot.tree.sync()
         print(f"{bot.user} synced {len(synced)} commands")
@@ -181,24 +182,22 @@ async def send_reminder():
 
 def init():
     global quiz_channel
-    quiz_channel = bot.get_channel(quiz_channel_id)
     global table_channel
-    table_channel = bot.get_channel(table_channel_id)
     global log_channel
-    log_channel = bot.get_channel(log_channel_id)
     global quiz_master
-    quiz_master = bot.get_user(quiz_master_id)
     global quiz
-    quiz = Quiz(quiz_channel, table_channel, log_channel, folder)
     global question_hour
-    question_hour = 0
     global reminder_hour
+    quiz_channel = bot.get_channel(quiz_channel_id)
+    table_channel = bot.get_channel(table_channel_id)
+    log_channel = bot.get_channel(log_channel_id)
+    quiz_master = bot.get_user(quiz_master_id)
+    quiz = Quiz(quiz_channel, table_channel, log_channel, folder)
+    question_hour = 0
     reminder_hour = 20
-
-
-if __name__ == '__main__':
-    bot.run(bot_token)
-    init()
     fix_clock_format.start()
     send_question.start()
     send_reminder.start()
+
+
+bot.run(bot_token)
