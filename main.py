@@ -156,7 +156,7 @@ async def hint(interaction: discord.Interaction):
 @tasks.loop(minutes=15, reconnect=True)
 async def fix_clock_format():
     if send_question.is_running():
-        send_question.change_interval(time=datetime.time(hour=local_hour_to_utc(question_hour), minute=23))
+        send_question.change_interval(time=datetime.time(hour=local_hour_to_utc(question_hour)))
     if send_reminder.is_running():
         send_reminder.change_interval(time=datetime.time(hour=local_hour_to_utc(reminder_hour)))
 
