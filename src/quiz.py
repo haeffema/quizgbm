@@ -101,6 +101,7 @@ class Quiz:
             if player.user == user:
                 if player.correct_today:
                     await self.send_hints(user)
+                    return
                 player.guesses += self.active_question.max_guesses - player.guesses % self.active_question.max_guesses
                 for count in range(3):
                     if player.guesses == self.active_question.max_guesses * (count + 1):
