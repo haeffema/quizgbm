@@ -67,9 +67,10 @@ class Quiz:
     async def join(self, user: discord.User):
         for player in self.players:
             if player.user == user:
-                return
+                return False
         self.players.append(Player(user, user.name))
         await self.update_table()
+        return True
 
     async def update_username(self, user: discord.User, username: str):
         for player in self.players:
@@ -97,6 +98,8 @@ class Quiz:
         await self.update_table()
 
     async def hint(self, user: discord.User):
+        if self.active_question is None:
+            return
         for player in self.players:
             if player.user == user:
                 if player.correct_today:

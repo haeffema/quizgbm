@@ -125,9 +125,12 @@ async def strike(interaction: discord.Interaction, player: discord.User, reason:
 @bot.tree.command(name="join", description="you join the quiz")
 async def join(interaction: discord.Interaction):
     if interaction.user != quiz_master:
-        await interaction.response.send_message("welcome to the quiz :)", ephemeral=True)
-        await quiz.join(interaction.user)
-        await quiz_master.send(f"{interaction.user} joined")
+        joined = await quiz.join(interaction.user)
+        if joined:
+            await interaction.response.send_message("welcome to the quiz :)", ephemeral=True)
+            await quiz_master.send(f"{interaction.user} joined")
+        else:
+            await interaction.response.send_message("you've joined already", ephemeral=True)
     else:
         await interaction.response.send_message("the quiz master can't join", ephemeral=True)
 
@@ -146,7 +149,7 @@ async def update_username(interaction: discord.Interaction, username: str):
 @bot.tree.command(name="hint", description="skips to the next hint. if finished sends you all the hints")
 async def hint(interaction: discord.Interaction):
     if interaction.user != quiz_master:
-        await interaction.response.send_message("check your dms", ephemeral=True)
+        await interaction.response.send_message("check your dms (if you didnt receive any message check #log)", ephemeral=True)
         await quiz.hint(interaction.user)
         await quiz_master.send(f"{interaction.user} used /hint")
     else:
