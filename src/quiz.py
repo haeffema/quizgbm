@@ -105,7 +105,8 @@ class Quiz:
                 if player.correct_today:
                     await self.send_hints(user)
                     return
-                player.guesses += self.active_question.max_guesses - player.guesses % self.active_question.max_guesses
+                player.guesses += self.active_question.max_guesses - \
+                    player.guesses % self.active_question.max_guesses
                 for count in range(3):
                     if player.guesses == self.active_question.max_guesses * (count + 1):
                         self.log_list.append(Log(player, "used /hint", count))
@@ -116,6 +117,8 @@ class Quiz:
     async def send_question(self, quiz_master: discord.User):
         if self.active_question is not None:
             await self.reveal_answer()
+        if not self.is_active:
+            return
         self.active_question = self.questions[self.count]
         self.count += 1
         await self.send_question_embed(self.quiz_channel)
@@ -127,9 +130,11 @@ class Quiz:
     async def send_question_embed(self, receiver):
         filename = 'send' + str(self.count) + '.png'
         file_location = self.folder + "/" + filename
-        description = self.active_question.question + f"\n{self.count}/{len(self.questions)}: {self.active_question.max_guesses} guesses"
+        description = self.active_question.question + \
+            f"\n{self.count}/{len(self.questions)}: {self.active_question.max_guesses} guesses"
         file = Path(file_location)
-        embed = discord.Embed(title=self.active_question.category, description=description)
+        embed = discord.Embed(
+            title=self.active_question.category, description=description)
         if file.exists():
             dc_file = discord.File(file_location)
             embed.set_image(url='attachment://' + filename)
@@ -166,7 +171,8 @@ class Quiz:
         file = Path(file_location)
         self.log_list.sort(key=lambda x: x.hint_number)
         hint_numbers = [1, 2, 3, "fill"]
-        embed = discord.Embed(title=self.active_question.category, description=self.active_question.question)
+        embed = discord.Embed(
+            title=self.active_question.category, description=self.active_question.question)
         users_str = ""
         answers_str = ""
         for log in self.log_list:
@@ -190,7 +196,8 @@ class Quiz:
         for hint_num in hint_numbers:
             embed.add_field(name="", value=f"Hint {hint_num}: {self.active_question.hints[hint_num - 1]}",
                             inline=False)
-        embed.add_field(name=self.active_question.answer, value="", inline=False)
+        embed.add_field(name=self.active_question.answer,
+                        value="", inline=False)
         if file.exists():
             dc_file = discord.File(file_location)
             embed.set_image(url='attachment://' + filename)
@@ -206,7 +213,8 @@ class Quiz:
     async def end_quiz(self):
         for player in self.players:
             if player.rank == 1:
-                self.end_message = f"Herzlichen Glückwunsch {player.username}\n" + self.end_message
+                self.end_message = f"Herzlichen Glückwunsch {player.username}\n" + \
+                    self.end_message
         await self.quiz_channel.send(self.end_message)
         self.is_active = False
 
@@ -226,7 +234,8 @@ class Quiz:
                         self.log_list.append(
                             Log(player, user_answer.content, player.guesses // self.active_question.max_guesses))
                     else:
-                        self.log_list.append(Log(player, user_answer.content, 3))
+                        self.log_list.append(
+                            Log(player, user_answer.content, 3))
                     player.guesses += 1
                     await user_answer.add_reaction('\N{negative squared cross mark}')
                     for count in range(3):
@@ -251,7 +260,8 @@ class Quiz:
     async def update_table(self):
         if self.table_message is not None:
             await self.table_message.delete()
-        self.players.sort(key=lambda player_to_sort: player_to_sort.points, reverse=True)
+        self.players.sort(
+            key=lambda player_to_sort: player_to_sort.points, reverse=True)
         rank = 1
         for index, player in enumerate(self.players):
             player.rank = rank
