@@ -160,10 +160,10 @@ async def hint(interaction: discord.Interaction):
 async def fix_clock_format():
     if send_question.is_running():
         send_question.change_interval(time=datetime.time(
-            hour=local_hour_to_utc(question_hour)))
+            hour=local_hour_to_utc(question_hour), tzinfo=datetime.timezone.utc))
     if send_reminder.is_running():
         send_reminder.change_interval(time=datetime.time(
-            hour=local_hour_to_utc(reminder_hour)))
+            hour=local_hour_to_utc(reminder_hour), tzinfo=datetime.timezone.utc))
 
 
 def local_hour_to_utc(local_hour):
