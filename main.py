@@ -23,21 +23,56 @@ TOKEN = os.getenv("TOKEN")
 OWNER_ID = int(os.getenv("OWNER_ID"))
 QUIZ_CHANNEL_ID = int(os.getenv("QUIZ_CHANNEL_ID"))
 TABLE_CHANNEL_ID = int(os.getenv("TABLE_CHANNEL_ID"))
-LOG_CHANNEL_ID = int(os.getenv("LOG_CHANNEL_ID"))
+
+
+async def test():
+    pass
+
+
+def calc_points(guesses, max_guesses):
+    points = 4 - (guesses // max_guesses)
+    if points < 1:
+        return 1
+    return points
 
 
 async def analyze_answer(message: discord.Message):
     if get_data().started:
-        pass
+        user = get_user(message.author.id)
+        if user is not None:
+            question = get_question(get_data().question_id)
+            if question is not None and not user.answered:
+                await bot.get_user(OWNER_ID).send(
+                    f"{user.username} hat geantwortet: {message.content}"
+                )
+                if message.content.lower() == question.answer.lower():
+                    await message.add_reaction("\N{WHITE HEAVY CHECK MARK}")
+                    user.points += calc_points(user.guesses, question.guesses)
+                    user.answered = True
+                    await message.reply(
+                        f"Richtig! Damit hast du nun {user.points} Punkte."
+                    )
+                    await send_table()
+                else:
+                    user.guesses += 1
+                    await message.add_reaction("\N{NEGATIVE SQUARED CROSS MARK}")
+                    if user.guesses == question.guesses:
+                        await message.reply(question.hint1)
+                    elif user.guesses == question.guesses * 2:
+                        await message.reply(question.hint2)
+                    elif user.guesses == question.guesses * 3:
+                        await message.reply(question.hint3)
+        update_user(user)
 
 
 async def send_question_to_receiver(receiver):
     question = get_question(get_data().question_id)
     file_name = f"question{question.id}.png"
-    file_location = f'resources/{file_name}'
-    description = f"{question.question}\nFrage {question.id}: {question.guesses} Versuche pro Hinweis"
+    file_location = f"resources/{file_name}"
+    title = f"{question.category}: {question.question}"
+    description = f"Frage {question.id}: {question.guesses} Versuche pro Hinweis"
     file = Path(file_location)
-    embed = discord.Embed(title=question.category, description=description)
+    embed = discord.Embed(title=title, description=description)
     if file.exists():
         dc_file = discord.File(file_location)
         embed.set_image(url=f"attachment://{file_name}")
@@ -46,8 +81,67 @@ async def send_question_to_receiver(receiver):
         await receiver.send(embed=embed)
 
 
+async def send_question_to_owner():
+    question = get_question(get_data().question_id)
+    embed = discord.Embed(title=question.question, description=question.answer)
+    await bot.get_user(OWNER_ID).send(embed=embed)
+
+
+async def send_table():
+    embed = discord.Embed(title="Tabelle")
+    places = ""
+    players = ""
+    points = ""
+
+    users = get_users()
+    users.sort(key=lambda x: x.points, reverse=True)
+    rank = 1
+    counter = 1
+    old_points = users[0].points
+    for user in users:
+        if old_points > user.points:
+            counter += 1
+        else:
+            rank = counter
+            old_points = user.points
+        places += f"{rank}\n"
+        players += f"{user.username}\n"
+        points += f"{user.points}\n"
+
+    embed.add_field(name="Platz", value=places, inline=True)
+    embed.add_field(name="Spieler", value=players, inline=True)
+    embed.add_field(name="Punkte", value=points, inline=True)
+
+    data = get_data()
+    table_channel = bot.get_channel(TABLE_CHANNEL_ID)
+    if data.table_message:
+        message = await table_channel.fetch_message(data.table_message)
+        await message.edit(embed=embed)
+    else:
+        message = await table_channel.send(embed=embed)
+        data.table_message = message.id
+        update_data(data)
+
+
+async def question_finished():
+    question = get_question(get_data().question_id)
+    if question.info is None:
+        embed = discord.Embed(
+            title=f"{question.category}: {question.question}",
+            description=f"Antwort: {question.answer}",
+        )
+    else:
+        embed = discord.Embed(
+            title=f"{question.category}: {question.question}",
+            description=f"Antwort: {question.answer}\n{question.info}",
+        )
+    await bot.get_channel(QUIZ_CHANNEL_ID).send(embed=embed)
+    await send_table()
+
+
 @bot.event
 async def on_ready():
+    await test()
     sync_clock.start()
     try:
         synced = await bot.tree.sync()
@@ -62,7 +156,7 @@ async def on_message(message: discord.Message):
     if message.author != bot.user and get_data().started:
         if type(message.channel) is discord.DMChannel and message.author.id in user_ids:
             await analyze_answer(message)
-        if message.channel.id in [QUIZ_CHANNEL_ID, TABLE_CHANNEL_ID, LOG_CHANNEL_ID]:
+        if message.channel.id in [QUIZ_CHANNEL_ID, TABLE_CHANNEL_ID]:
             await message.delete()
 
 
@@ -73,10 +167,14 @@ async def beitreten(interaction: discord.Interaction):
         await interaction.response.send_message(
             "Schön dass du hier bist :D", ephemeral=True
         )
+        await bot.get_user(OWNER_ID).send(
+            f"{interaction.user.name} ist dem Quiz beigetreten"
+        )
     else:
         await interaction.response.send_message(
             "Man kann nur einmal beitreten ;)", ephemeral=True
         )
+    await send_table()
 
 
 @bot.tree.command(
@@ -90,8 +188,11 @@ async def benutzername_updaten(interaction: discord.Interaction, username: str):
         await interaction.response.send_message(
             f"Benutzername ist nun {username}", ephemeral=True
         )
-        return
-    await interaction.response.send_message("Tritt zuerst dem Quiz bei", ephemeral=True)
+    else:
+        await interaction.response.send_message(
+            "Tritt zuerst dem Quiz bei", ephemeral=True
+        )
+    await send_table()
 
 
 @bot.tree.command(name="start", description="Start the quiz")
@@ -125,7 +226,6 @@ async def sync_clock():
     send_reminder.change_interval(time=adjusted_reminder_time)
 
     if not send_question.is_running():
-        send_question.change_interval(seconds=3)
         send_question.start()
     if not send_reminder.is_running():
         send_reminder.start()
@@ -133,16 +233,36 @@ async def sync_clock():
 
 @tasks.loop(hours=2000)
 async def send_question():
-    if get_data().started:
-        # await send_question_to_receiver(bot.get_channel(QUIZ_CHANNEL_ID))
+    data = get_data()
+    if data.started:
+        if data.question_id is None:
+            data.question_id = 1
+            update_data(data)
+        else:
+            await question_finished()
+            data.question_id += 1
+            update_data(data)
+            if get_question(data.question_id) is None:
+                data.started = False
+                update_data(data)
+                await bot.get_channel(QUIZ_CHANNEL_ID).send(data.end_message)
+                await send_table()
+                return
+        await send_question_to_owner()
+        await send_question_to_receiver(bot.get_channel(QUIZ_CHANNEL_ID))
         for user in get_users():
+            user.answered = False
+            user.guesses = 0
+            update_user(user)
             await send_question_to_receiver(bot.get_user(user.id))
 
 
 @tasks.loop(hours=2000)
 async def send_reminder():
     if get_data().started:
-        pass
+        for user in get_users():
+            if user.answered is False:
+                await bot.get_user(user.id).send("Du hast noch nicht geantwortet!")
 
 
 bot.run(TOKEN)

@@ -36,15 +36,7 @@ class Data(Base):
     start_message = Column(String, default="")
     end_message = Column(String, default="")
     started = Column(Boolean, default=False)
-
-
-class Messages(Base):
-    __tablename__ = "messages"
-
-    id = Column(Integer, primary_key=True)
-    message = Column(String, default="")
-    question_id = Column(Integer, ForeignKey("questions.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
+    table_message = Column(Integer, default=None)
 
 
 engine = create_engine("sqlite:///_data.db")
@@ -94,16 +86,3 @@ def get_data() -> Data:
 def update_data(data: Data) -> None:
     session.add(data)
     session.commit()
-
-
-### MESSAGE ###
-
-
-def add_message(question_id: int, user_id: int, message: str) -> None:
-    new_message = Messages(message=message, question_id=question_id, user_id=user_id)
-    session.add(new_message)
-    session.commit()
-
-
-def get_messages(question_id: int) -> list[Messages]:
-    return session.query(Messages).filter(Messages.question_id == question_id).all()

@@ -1,1 +1,1 @@
-screen -AmdS quizgbm python3 main.py
+sudo screen -AmdS quizgbm /root/max/quizgbm/run.sh

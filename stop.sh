@@ -1,1 +1,1 @@
-screen -r quizgbm -X quit
+sudo screen -r quizgbm -X quit
