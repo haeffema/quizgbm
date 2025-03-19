@@ -67,7 +67,7 @@ async def analyze_answer(message: discord.Message):
 
 async def send_question_to_receiver(receiver):
     question = get_question(get_data().question_id)
-    file_name = f"question{question.id}.png"
+    file_name = f"{question.id}.png"
     file_location = f"resources/{file_name}"
     title = f"{question.category}: {question.question}"
     description = f"Frage {question.id}: {question.guesses} Versuche pro Hinweis"
@@ -84,6 +84,9 @@ async def send_question_to_receiver(receiver):
 async def send_question_to_owner():
     question = get_question(get_data().question_id)
     embed = discord.Embed(title=question.question, description=question.answer)
+    embed.add_field(name="Hinweis 1", value=question.hint1, inline=True)
+    embed.add_field(name="Hinweis 2", value=question.hint2, inline=True)
+    embed.add_field(name="Hinweis 3", value=question.hint3, inline=True)
     await bot.get_user(OWNER_ID).send(embed=embed)
 
 
@@ -96,13 +99,10 @@ async def send_table():
     users = get_users()
     users.sort(key=lambda x: x.points, reverse=True)
     rank = 1
-    counter = 1
     old_points = users[0].points
-    for user in users:
-        if old_points > user.points:
-            counter += 1
-        else:
-            rank = counter
+    for i, user in enumerate(users):
+        if old_points != user.points:
+            rank = i + 1
             old_points = user.points
         places += f"{rank}\n"
         players += f"{user.username}\n"
@@ -135,13 +135,16 @@ async def question_finished():
             title=f"{question.category}: {question.question}",
             description=f"Antwort: {question.answer}\n{question.info}",
         )
+    embed.add_field(name="Hinweis 1", value=question.hint1, inline=True)
+    embed.add_field(name="Hinweis 2", value=question.hint2, inline=True)
+    embed.add_field(name="Hinweis 3", value=question.hint3, inline=True)
     await bot.get_channel(QUIZ_CHANNEL_ID).send(embed=embed)
     await send_table()
 
 
 @bot.event
 async def on_ready():
-    await test()
+    await send_table()
     sync_clock.start()
     try:
         synced = await bot.tree.sync()
@@ -197,7 +200,7 @@ async def benutzername_updaten(interaction: discord.Interaction, username: str):
 
 @bot.tree.command(name="start", description="Start the quiz")
 async def start(interaction: discord.Interaction):
-    if interaction.user.id == OWNER_ID or get_data().started:
+    if interaction.user.id == OWNER_ID and not get_data().started:
         data = get_data()
         data.started = True
         update_data(data)
