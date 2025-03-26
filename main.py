@@ -52,7 +52,6 @@ async def analyze_answer(message: discord.Message):
                     await message.reply(
                         f"Richtig! Damit hast du nun {user.points} Punkte."
                     )
-                    await send_table()
                 else:
                     user.guesses += 1
                     await message.add_reaction("\N{NEGATIVE SQUARED CROSS MARK}")
@@ -63,6 +62,7 @@ async def analyze_answer(message: discord.Message):
                     elif user.guesses == question.guesses * 3:
                         await message.reply(question.hint3)
         update_user(user)
+        await send_table()
 
 
 async def send_question_to_receiver(receiver):
@@ -84,13 +84,13 @@ async def send_question_to_receiver(receiver):
 async def send_question_to_owner():
     question = get_question(get_data().question_id)
     embed = discord.Embed(title=question.question, description=question.answer)
-    embed.add_field(name="Hinweis 1", value=question.hint1, inline=True)
-    embed.add_field(name="Hinweis 2", value=question.hint2, inline=True)
-    embed.add_field(name="Hinweis 3", value=question.hint3, inline=True)
+    embed.add_field(name="Hinweis 1", value=question.hint1)
+    embed.add_field(name="Hinweis 2", value=question.hint2)
+    embed.add_field(name="Hinweis 3", value=question.hint3)
     await bot.get_user(OWNER_ID).send(embed=embed)
 
 
-async def send_table():
+async def send_table(finished=False):
     embed = discord.Embed(title="Tabelle")
     places = ""
     players = ""
@@ -100,14 +100,17 @@ async def send_table():
     users.sort(key=lambda x: x.points, reverse=True)
     rank = 1
     old_points = users[0].points
+    points_len = len(str(old_points))
     for i, user in enumerate(users):
         if old_points != user.points:
             rank = i + 1
             old_points = user.points
         places += f"{rank}\n"
         players += f"{user.username}\n"
-        points += f"{user.points}\n"
-
+        if user.answered and not finished:
+            points += f"{user.points:0{points_len}d}\n"
+        else:
+            points += f"{user.points:0{points_len}d} | max. + {calc_points(user.guesses, get_question(get_data().question_id).guesses)}\n"
     embed.add_field(name="Platz", value=places, inline=True)
     embed.add_field(name="Spieler", value=players, inline=True)
     embed.add_field(name="Punkte", value=points, inline=True)
@@ -135,16 +138,15 @@ async def question_finished():
             title=f"{question.category}: {question.question}",
             description=f"Antwort: {question.answer}\n{question.info}",
         )
-    embed.add_field(name="Hinweis 1", value=question.hint1, inline=True)
-    embed.add_field(name="Hinweis 2", value=question.hint2, inline=True)
-    embed.add_field(name="Hinweis 3", value=question.hint3, inline=True)
+    embed.add_field(name="Hinweis 1", value=question.hint1)
+    embed.add_field(name="Hinweis 2", value=question.hint2)
+    embed.add_field(name="Hinweis 3", value=question.hint3)
     await bot.get_channel(QUIZ_CHANNEL_ID).send(embed=embed)
     await send_table()
 
 
 @bot.event
 async def on_ready():
-    await send_table()
     sync_clock.start()
     try:
         synced = await bot.tree.sync()
@@ -159,7 +161,10 @@ async def on_message(message: discord.Message):
     if message.author != bot.user and get_data().started:
         if type(message.channel) is discord.DMChannel and message.author.id in user_ids:
             await analyze_answer(message)
-        if message.channel.id in [QUIZ_CHANNEL_ID, TABLE_CHANNEL_ID]:
+        if (
+            message.channel.id in [QUIZ_CHANNEL_ID, TABLE_CHANNEL_ID]
+            and message.author.id != OWNER_ID
+        ):
             await message.delete()
 
 
@@ -215,12 +220,12 @@ async def sync_clock():
     berlin_time = datetime.now(tz=ZoneInfo("Europe/Berlin"))
     time_delta = berlin_time.utcoffset()
 
-    quiz_time = time(0, 0, 0)
+    quiz_time = time(20, 0, 0)
     dummy_quiz_date = datetime.combine(datetime.now(), quiz_time)
     adjusted_quiz_date = dummy_quiz_date - time_delta
     adjusted_quiz_time = adjusted_quiz_date.time()
 
-    reminder_time = time(18, 0, 0)
+    reminder_time = time(12, 0, 0)
     dummy_reminder_date = datetime.combine(datetime.now(), reminder_time)
     adjusted_reminder_date = dummy_reminder_date - time_delta
     adjusted_reminder_time = adjusted_reminder_date.time()
@@ -249,7 +254,7 @@ async def send_question():
                 data.started = False
                 update_data(data)
                 await bot.get_channel(QUIZ_CHANNEL_ID).send(data.end_message)
-                await send_table()
+                await send_table(True)
                 return
         await send_question_to_owner()
         await send_question_to_receiver(bot.get_channel(QUIZ_CHANNEL_ID))
