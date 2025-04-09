@@ -1,6 +1,8 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
+from consts import QUIZ_FOLDER
+
 Base = declarative_base()
 
 
@@ -39,7 +41,15 @@ class Data(Base):
     table_message = Column(Integer, default=None)
 
 
-engine = create_engine("sqlite:///_data.db")
+class Message(Base):
+    __tablename__ = "messages"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    content = Column(String, default="")
+    question_id = Column(Integer, ForeignKey("questions.id"))
+
+
+engine = create_engine(f"sqlite:///{QUIZ_FOLDER}/data.db")
 
 Base.metadata.create_all(engine)
 
@@ -85,4 +95,17 @@ def get_data() -> Data:
 
 def update_data(data: Data) -> None:
     session.add(data)
+    session.commit()
+
+
+### MESSAGE ###
+
+
+def get_messages(question_id) -> list[Message]:
+    return session.query(Message).filter(Message.question_id == question_id)
+
+
+def add_message(content) -> None:
+    new_message = Message(content=content, question_id=get_data().question_id)
+    session.add(new_message)
     session.commit()
