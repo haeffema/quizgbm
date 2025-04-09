@@ -4,7 +4,7 @@ import json
 from discord.ext import commands, tasks
 from datetime import datetime, time
 from zoneinfo import ZoneInfo
-from consts import LOG_CHANNEL_ID, OWNER_ID, QUIZ_CHANNEL_ID, QUIZ_FOLDER, TABLE_CHANNEL_ID, TOKEN
+from consts import LOG_CHANNEL_ID, OWNER_ID, QUIZ_CHANNEL_ID, QUIZ_FOLDER, QUIZ_TIME, REMINDER_TIME, TABLE_CHANNEL_ID, TOKEN
 from database import (
     add_message,
     add_user,
@@ -387,12 +387,12 @@ async def sync_clock():
     berlin_time = datetime.now(tz=ZoneInfo("Europe/Berlin"))
     time_delta = berlin_time.utcoffset()
 
-    quiz_time = time(20, 0, 0)
+    quiz_time = QUIZ_TIME
     dummy_quiz_date = datetime.combine(datetime.now(), quiz_time)
     adjusted_quiz_date = dummy_quiz_date - time_delta
     adjusted_quiz_time = adjusted_quiz_date.time()
 
-    reminder_time = time(16, 0, 0)
+    reminder_time = REMINDER_TIME
     dummy_reminder_date = datetime.combine(datetime.now(), reminder_time)
     adjusted_reminder_date = dummy_reminder_date - time_delta
     adjusted_reminder_time = adjusted_reminder_date.time()
