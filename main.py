@@ -2,7 +2,7 @@ from pathlib import Path
 import discord
 import json
 from discord.ext import commands, tasks
-from datetime import datetime, time
+from datetime import datetime
 from zoneinfo import ZoneInfo
 from consts import LOG_CHANNEL_ID, OWNER_ID, QUIZ_CHANNEL_ID, QUIZ_FOLDER, QUIZ_TIME, REMINDER_TIME, TABLE_CHANNEL_ID, TOKEN
 from database import (
