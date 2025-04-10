@@ -248,7 +248,7 @@ async def question_finished():
     embed.add_field(name="Hinweis 2", value=question.hint2, inline=True)
     embed.add_field(name="Hinweis 3", value=question.hint3, inline=True)
 
-    embed.add_field(name=question.answer, value=" ")
+    embed.add_field(name="Ich leak doch hier nicht das Passwort.", value=" ")
     await bot.get_channel(LOG_CHANNEL_ID).send(embed=embed)
 
 
