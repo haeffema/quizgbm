@@ -11,5 +11,5 @@ QUIZ_CHANNEL_ID = int(os.getenv("QUIZ_CHANNEL_ID", "-1"))
 TABLE_CHANNEL_ID = int(os.getenv("TABLE_CHANNEL_ID", "-1"))
 LOG_CHANNEL_ID = int(os.getenv("LOG_CHANNEL_ID", "-1"))
 QUIZ_FOLDER = f"resources/{os.getenv('QUIZ_FOLDER', '')}"
-QUIZ_TIME = time(20, 0, 0)
-REMINDER_TIME = time(16, 0, 0)
+QUIZ_TIME = time(12, 0, 0)
+REMINDER_TIME = time(8, 0, 0)
