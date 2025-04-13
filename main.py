@@ -4,7 +4,16 @@ import json
 from discord.ext import commands, tasks
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from consts import LOG_CHANNEL_ID, OWNER_ID, QUIZ_CHANNEL_ID, QUIZ_FOLDER, QUIZ_TIME, REMINDER_TIME, TABLE_CHANNEL_ID, TOKEN
+from consts import (
+    LOG_CHANNEL_ID,
+    OWNER_ID,
+    QUIZ_CHANNEL_ID,
+    QUIZ_FOLDER,
+    QUIZ_TIME,
+    REMINDER_TIME,
+    TABLE_CHANNEL_ID,
+    TOKEN,
+)
 from database import (
     add_message,
     add_user,
@@ -438,7 +447,9 @@ async def send_reminder():
     if get_data().started:
         for user in get_users():
             if user.answered is False:
-                await bot.get_user(user.id).send("Du hast noch nicht geantwortet!")
+                await bot.get_user(user.id).send(
+                    f"Hallo {user.username}, denk daran zu antworten!"
+                )
 
 
 bot.run(TOKEN)
