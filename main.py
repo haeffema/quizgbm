@@ -149,6 +149,7 @@ async def send_question_to_owner():
     embed.add_field(name="Hinweis 1", value=question.hint1)
     embed.add_field(name="Hinweis 2", value=question.hint2)
     embed.add_field(name="Hinweis 3", value=question.hint3)
+    embed.set_footer(text=f"Frage {question.id} | {question.guesses} Versuche")
     file_name = f"{question.id}.png"
     file_location = f"{QUIZ_FOLDER}/{file_name}"
     file = Path(file_location)
