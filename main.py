@@ -182,6 +182,20 @@ async def send_table(finished=False):
                 f"{user.points:0{points_len}d} | max. + {calc_points(user.guesses, get_question(get_data().question_id).guesses)}"
             )
 
+    if finished:
+        winner = []
+        for i in range(len(table_data["Platz"])):
+            if table_data["Platz"][i] == 1:
+                winner.append(table_data["Spieler"][i])
+        if len(winner) == 1:
+            await bot.get_channel(QUIZ_CHANNEL_ID).send(
+                f"Herzlichen Glückwunsch an {winner[0]} zum ersten Platz!"
+            )
+        else:
+            await bot.get_channel(QUIZ_CHANNEL_ID).send(
+                f"Herzlichen Glückwunsch an {', '.join(winner)} zum ersten Platz!"
+            )
+
     with open("old_data.json", "r") as f:
         old_data = json.load(f)
 
