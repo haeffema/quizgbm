@@ -175,7 +175,7 @@ async def send_table(finished=False):
             old_points = user.points
         table_data["Platz"].append(rank)
         table_data["Spieler"].append(user.username)
-        if user.answered and not finished:
+        if user.answered or finished:
             table_data["Punkte"].append(f"{user.points:0{points_len}d}")
         else:
             table_data["Punkte"].append(
