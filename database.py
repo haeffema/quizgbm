@@ -12,7 +12,6 @@ class Question(Base):
     id = Column(Integer, primary_key=True)
     question = Column(String, default="")
     answer = Column(String, default="")
-    translated_answer = Column(String, default=None, nullable=True)
     category = Column(String, default="")
     guesses = Column(Integer, default=3)
     hint1 = Column(String, default="")

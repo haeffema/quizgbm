@@ -44,6 +44,7 @@ async def delete_last_message():
 
 
 async def test():
+    # await send_question()
     pass
 
 
@@ -60,10 +61,7 @@ async def analyze_answer(message: discord.Message):
         if user is not None:
             question = get_question(get_data().question_id)
             if question is not None and not user.answered:
-                translated = question.translated_answer
-                if not translated:
-                    translated = question.answer
-                if message.content.lower() in [question.answer.lower(), translated.lower()]:
+                if message.content.lower() in [question.answer.lower()]:
                     await message.add_reaction("\N{WHITE HEAVY CHECK MARK}")
                     user.points += calc_points(user.guesses, question.guesses)
                     user.answered = True
@@ -148,10 +146,7 @@ async def send_question_to_receiver(receiver):
 
 async def send_question_to_owner():
     question = get_question(get_data().question_id)
-    dsc = question.answer
-    if question.translated_answer:
-        dsc = f"{question.answer} - {question.translated_answer}"
-    embed = discord.Embed(title=question.question, description=dsc)
+    embed = discord.Embed(title=question.question, description=question.answer)
     embed.add_field(name="Hinweis 1", value=question.hint1)
     embed.add_field(name="Hinweis 2", value=question.hint2)
     embed.add_field(name="Hinweis 3", value=question.hint3)
@@ -277,15 +272,7 @@ async def question_finished():
     embed.add_field(name="Hinweis 1", value=question.hint1, inline=True)
     embed.add_field(name="Hinweis 2", value=question.hint2, inline=True)
     embed.add_field(name="Hinweis 3", value=question.hint3, inline=True)
-
-    if question.translated_answer:
-        embed.add_field(
-            name=f"{question.answer} - {question.translated_answer}",
-            value=question.translated_answer,
-        )
-
-    else:
-        embed.add_field(name=question.answer, value=" ")
+    embed.add_field(name=question.answer, value=" ")
 
     await bot.get_channel(LOG_CHANNEL_ID).send(embed=embed)
 
