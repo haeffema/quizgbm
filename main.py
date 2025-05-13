@@ -285,7 +285,15 @@ async def send_hints(userId: int, hintAmount: int):
         embed.add_field(name="Hinweis 2", value=question.hint2)
     if hintAmount > 2:
         embed.add_field(name="Hinweis 3", value=question.hint3)
-    await bot.get_user(userId).send(embed=embed)
+    file_name = f"{question.id}.png"
+    file_location = f"{QUIZ_FOLDER}/{file_name}"
+    file = Path(file_location)
+    if file.exists():
+        dc_file = discord.File(file_location)
+        embed.set_image(url=f"attachment://{file_name}")
+        await bot.get_user(userId).send(embed=embed, file=dc_file)
+    else:
+        await bot.get_user(userId).send(embed=embed)
 
 
 @bot.event
