@@ -393,7 +393,7 @@ async def hinweis(interaction: discord.Interaction):
                             f"{interaction.user.display_name} hat Hinweis 3 per Command bekommen."
                         )
                     else:
-                        await interaction.user.send("Du hast alle Hinweise erhalten.")
+                        await send_hints(interaction.user.id, 3)
                     update_user(user)
                 else:
                     await send_hints(interaction.user.id, 3)
