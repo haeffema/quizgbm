@@ -94,7 +94,7 @@ async def analyze_answer(message: discord.Message):
                     ):
                         await message.add_reaction("\N{HEAVY EXCLAMATION MARK SYMBOL}")
                     if user.guesses == question.guesses:
-                        await message.reply(question.hint1)
+                        await send_hints(message.author.id, 1)
                         await bot.get_user(OWNER_ID).send(
                             f"{message.author.display_name} hat Hinweis 1 bekommen."
                         )
@@ -102,7 +102,7 @@ async def analyze_answer(message: discord.Message):
                             f"{message.author.display_name} hat Hinweis 1 bekommen."
                         )
                     elif user.guesses == question.guesses * 2:
-                        await message.reply(question.hint2)
+                        await send_hints(message.author.id, 2)
                         await bot.get_user(OWNER_ID).send(
                             f"{message.author.display_name} hat Hinweis 2 bekommen."
                         )
@@ -110,7 +110,7 @@ async def analyze_answer(message: discord.Message):
                             f"{message.author.display_name} hat Hinweis 2 bekommen."
                         )
                     elif user.guesses == question.guesses * 3:
-                        await message.reply(question.hint3)
+                        await send_hints(message.author.id, 3)
                         await bot.get_user(OWNER_ID).send(
                             f"{message.author.display_name} hat Hinweis 3 bekommen."
                         )
@@ -121,7 +121,7 @@ async def analyze_answer(message: discord.Message):
         await send_table()
 
 
-async def send_question_to_receiver(receiver):
+async def send_question_to_receiver(receiver: int):
     question = get_question(get_data().question_id)
     file_name = f"{question.id}.png"
     file_location = f"{QUIZ_FOLDER}/{file_name}"
@@ -277,6 +277,17 @@ async def question_finished():
     await bot.get_channel(LOG_CHANNEL_ID).send(embed=embed)
 
 
+async def send_hints(userId: int, hintAmount: int):
+    question = get_question(get_data().question_id)
+    embed = discord.Embed(title=question.question)
+    embed.add_field(name="Hinweis 1", value=question.hint1)
+    if hintAmount > 1:
+        embed.add_field(name="Hinweis 2", value=question.hint2)
+    if hintAmount > 2:
+        embed.add_field(name="Hinweis 3", value=question.hint3)
+    await bot.get_user(userId).send(embed=embed)
+
+
 @bot.event
 async def on_ready():
     sync_clock.start()
@@ -348,7 +359,7 @@ async def hinweis(interaction: discord.Interaction):
                 if not user.answered:
                     if user.guesses < question.guesses:
                         user.guesses = question.guesses
-                        await interaction.user.send(question.hint1)
+                        await send_hints(interaction.user.id, 1)
                         await bot.get_user(OWNER_ID).send(
                             f"{interaction.user.display_name} hat Hinweis 1 per Command bekommen."
                         )
@@ -357,7 +368,7 @@ async def hinweis(interaction: discord.Interaction):
                         )
                     elif user.guesses < question.guesses * 2:
                         user.guesses = question.guesses * 2
-                        await interaction.user.send(question.hint2)
+                        await send_hints(interaction.user.id, 2)
                         await bot.get_user(OWNER_ID).send(
                             f"{interaction.user.display_name} hat Hinweis 2 per Command bekommen."
                         )
@@ -366,7 +377,7 @@ async def hinweis(interaction: discord.Interaction):
                         )
                     elif user.guesses < question.guesses * 3:
                         user.guesses = question.guesses * 3
-                        await interaction.user.send(question.hint3)
+                        await send_hints(interaction.user.id, 3)
                         await bot.get_user(OWNER_ID).send(
                             f"{interaction.user.display_name} hat Hinweis 3 per Command bekommen."
                         )
@@ -377,9 +388,7 @@ async def hinweis(interaction: discord.Interaction):
                         await interaction.user.send("Du hast alle Hinweise erhalten.")
                     update_user(user)
                 else:
-                    await interaction.user.send(
-                        f"{question.hint1}\n{question.hint2}\n{question.hint3}"
-                    )
+                    await send_hints(interaction.user.id, 3)
     await interaction.response.send_message("Schau in deine DM's.", ephemeral=True)
     await send_table()
 
