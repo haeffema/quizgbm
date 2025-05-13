@@ -44,7 +44,7 @@ async def delete_last_message():
 
 
 async def test():
-    # await send_question()
+    # await delete_last_message()
     pass
 
 
