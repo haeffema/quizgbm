@@ -169,7 +169,6 @@ async def send_table(finished=False):
     users.sort(key=lambda x: x.points, reverse=True)
     rank = 1
     old_points = users[0].points
-    points_len = len(str(old_points))
     for i, user in enumerate(users):
         if old_points != user.points:
             rank = i + 1
@@ -177,10 +176,10 @@ async def send_table(finished=False):
         table_data["Platz"].append(rank)
         table_data["Spieler"].append(user.username)
         if user.answered or finished:
-            table_data["Punkte"].append(f"{user.points:0{points_len}d}")
+            table_data["Punkte"].append(f"{user.points}")
         else:
             table_data["Punkte"].append(
-                f"{user.points:0{points_len}d} | max. + {calc_points(user.guesses, get_question(get_data().question_id).guesses)}"
+                f"{user.points} | max. + {calc_points(user.guesses, get_question(get_data().question_id).guesses)}"
             )
 
     if finished:
