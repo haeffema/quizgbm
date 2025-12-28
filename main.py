@@ -164,6 +164,7 @@ async def send_question_to_owner():
 
 async def send_table(finished=False):
     table_data = {"Platz": [], "Spieler": [], "Punkte": []}
+    data = get_data()
 
     users = get_users()
     users.sort(key=lambda x: x.points, reverse=True)
@@ -175,11 +176,11 @@ async def send_table(finished=False):
             old_points = user.points
         table_data["Platz"].append(rank)
         table_data["Spieler"].append(user.username)
-        if user.answered or finished:
+        if user.answered or finished or data.question_id is None:
             table_data["Punkte"].append(f"{user.points}")
         else:
             table_data["Punkte"].append(
-                f"{user.points} | max. + {calc_points(user.guesses, get_question(get_data().question_id).guesses)}"
+                f"{user.points} | max. + {calc_points(user.guesses, get_question(data.question_id).guesses)}"
             )
 
     if finished:
@@ -207,9 +208,16 @@ async def send_table(finished=False):
 
     df = pd.DataFrame(table_data)
 
-    fig, ax = plt.subplots(figsize=(5, 2))
-    fig.patch.set_facecolor("#070709")
-    ax.set_facecolor("#131517")
+    BG_COLOR = "#070709"
+    GRID_COLOR = "#4F545C" 
+    TEXT_COLOR = "#FFFFFF" 
+    LINE_WIDTH_HEADER = 0.8
+    LINE_WIDTH_BODY = 0.5
+
+    fig, ax = plt.subplots(figsize=(6, 5)) 
+
+    fig.patch.set_facecolor(BG_COLOR)
+    ax.set_facecolor(BG_COLOR)
 
     ax.axis("tight")
     ax.axis("off")
@@ -219,27 +227,61 @@ async def send_table(finished=False):
         colLabels=df.columns,
         cellLoc="center",
         loc="center",
-        colColours=["#131517"] * df.shape[1],
+        colColours=[BG_COLOR] * df.shape[1],
     )
 
+    table.auto_set_font_size(False)
+    table.set_fontsize(12)
+
+    table.scale(1, 1.8) 
+
     for (i, j), cell in table.get_celld().items():
-        cell.set_edgecolor("#e5e5e8")
-        cell.set_text_props(color="#e5e5e8", fontsize=10)
+        
+        cell.set_text_props(color=TEXT_COLOR)
+        cell.set_facecolor(BG_COLOR)
+        
+        cell.set_edgecolor(BG_COLOR)
+        cell.set_linewidth(0)
+
         if i == 0:
-            cell.set_text_props(fontweight="bold", color="#e5e5e8", fontsize=10)
-        if i > 0:
-            cell.set_facecolor("#131517")
+            cell.set_text_props(fontweight="bold", color=TEXT_COLOR, fontsize=13)
+            
+            cell.set_edgecolor(GRID_COLOR)
+            cell.set_linewidth(LINE_WIDTH_HEADER)
+            
+        elif i > 0:
+            cell.set_edgecolor(GRID_COLOR)
+            cell.set_linewidth(LINE_WIDTH_BODY)
+            
+            if i == 1:
+                cell.set_edgecolor(BG_COLOR)
+                cell.set_linewidth(0)
 
-    plt.title("Tabelle", fontsize=14, color="#e5e5e8", pad=3)
+            pass
 
-    plt.subplots_adjust(top=0.85)
+    for (i, j), cell in table.get_celld().items():
+        cell.set_edgecolor(BG_COLOR)
+        cell.set_linewidth(0)
+
+        if i == 0:
+            pass
+        
+        elif i > 0:
+            if i == 1:
+                cell.set_edgecolor(GRID_COLOR)
+                cell.set_linewidth(LINE_WIDTH_HEADER)
+            else:
+                cell.set_edgecolor(GRID_COLOR)
+                cell.set_linewidth(LINE_WIDTH_BODY)
+
+
+    plt.subplots_adjust(top=0.95, bottom=0.05) 
 
     plt.savefig(
-        "table.png", dpi=300, bbox_inches="tight", facecolor=fig.get_facecolor()
+        "table.png", dpi=500, bbox_inches="tight", facecolor=fig.get_facecolor()
     )
     plt.close()
 
-    data = get_data()
     table_channel = bot.get_channel(TABLE_CHANNEL_ID)
     if data.table_message:
         try:
@@ -250,8 +292,8 @@ async def send_table(finished=False):
     message = await table_channel.send(file=discord.File("table.png"))
     data.table_message = message.id
     update_data(data)
-
-
+    
+    
 async def question_finished():
     question = get_question(get_data().question_id)
     messages = get_messages(get_data().question_id)
@@ -423,7 +465,7 @@ async def nachricht(interaction: discord.Interaction, message: str):
         await interaction.response.send_message("Leck Eier", ephemeral=True)
 
 
-@tasks.loop(hours=5)
+@tasks.loop(minutes=15)
 async def sync_clock():
     berlin_time = datetime.now(tz=ZoneInfo("Europe/Berlin"))
     time_delta = berlin_time.utcoffset()
@@ -467,6 +509,8 @@ async def send_question():
         await send_question_to_owner()
         await send_question_to_receiver(bot.get_channel(QUIZ_CHANNEL_ID))
         for user in get_users():
+            if not user.answered:
+                user.points += 1
             user.answered = False
             user.guesses = 0
             update_user(user)

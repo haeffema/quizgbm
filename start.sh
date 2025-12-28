@@ -1,1 +1,1 @@
-sudo screen -AmdS quizgbm /root/max/quizgbm/run.sh
+sudo screen -AmdS quizgbm /root/dev/quizgbm/run.sh
