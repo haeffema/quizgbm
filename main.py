@@ -49,9 +49,9 @@ async def test():
 
 
 def calc_points(guesses, max_guesses):
-    points = 4 - (guesses // max_guesses)
-    if points < 1:
-        return 1
+    points = 5 - (guesses // max_guesses)
+    if points < 2:
+        return 2
     return points
 
 
